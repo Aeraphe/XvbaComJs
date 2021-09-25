@@ -1,7 +1,7 @@
 {
-  "name": "xvbacom",
+  "name": "xvbacomjs",
   "version": "1.0.0",
-  "description": "",
+  "description": "Create a Windows COM with Typescript. (Already Include Excel Library and Kernel32)",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,13 +11,14 @@
     "type": "git",
     "url": "git+https://github.com/Aeraphe/XvbaCom.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["xvba","vba","excel","win32","ol32","word","powerpoint"],
+  "author": "Alberto Eduardo de Castro Oliveira",
+  "email" :"albeto.aeraphe@gmail.com",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Aeraphe/XvbaCom/issues"
   },
-  "homepage": "https://github.com/Aeraphe/XvbaCom#readme",
+  "homepage": "www.xvba.dev",
   "devDependencies": {
     "@types/ffi-napi": "^4.0.4",
     "@types/ref-napi": "^3.0.4",
