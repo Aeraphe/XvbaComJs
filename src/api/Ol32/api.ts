@@ -2,15 +2,15 @@ import * as ffi from "ffi-napi";
 import * as path from "path";
 import * as os from "os";
 
-let XvbaComDll = "" ;
+const getDllFile = () => {
+  if (os.arch() === "x64") {
+    return path.join(__dirname, "lib", "64", "XvbaCom.dll");
+  } else {
+    return path.join(__dirname, "lib", "32", "XvbaCom.dll");
+  }
+};
 
-if (os.arch() === "x64") {
-  XvbaComDll = path.join(
-    "F:\\Apps\\XvbaCom\\XvbaCom\\x64\\Release\\XvbaCom.dll"
-  );
-} 
-
-export const ApiOl32 = ffi.Library(XvbaComDll, {
+export const ApiOl32 = ffi.Library(getDllFile(), {
   XvbaCoCreateInstance: ["int", ["pointer", "pointer"]],
   XvbaShowApplication: ["int", ["pointer"]],
   XvbaGetMethod: ["int", ["pointer", "pointer", "pointer"]],
