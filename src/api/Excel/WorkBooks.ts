@@ -1,18 +1,20 @@
-import { XvbaCOM } from "../../XvbaCom/XvbaCom";
+import { XvbaCOM } from "../../XvbaComJs/XvbaCom";
 import { WorkBook } from "./WorkBook";
 
 export class WorkBooks extends XvbaCOM {
-    private WorkBook: WorkBook;
   
-    constructor() {
-      super();
-    }
   
-    Open(filePath: string) {
-      console.log("Open")
-      const resp = this.Invoke("Open", filePath);
-      this.WorkBook.gui.pointer = resp.method;
-      return this.WorkBook;
-    }
-    
+  constructor() {
+    super();
   }
+
+  /**
+   * Open Excel file
+   * @param filePath :string
+   * @returns
+   */
+  Open(filePath: string) {
+    const { objectPtr } = this.Call("Open", filePath);
+    return new WorkBook(objectPtr);
+  }
+}
