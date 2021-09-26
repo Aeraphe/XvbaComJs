@@ -1,5 +1,4 @@
-import { XvbaCOM } from "../../XvbaCom/XvbaCom";
-import { ApiOl32 } from "../Ol32/api";
+import { XvbaCOM } from "../../XvbaComJs/XvbaCom";
 import { WorkBooks } from "./WorkBooks";
 
 
@@ -11,8 +10,9 @@ export class Excel extends XvbaCOM {
     this.WorkBooks = new WorkBooks();
   }
 
-  Display() {
-    ApiOl32.XvbaShowApplication(this.gui.pointer);
+  Visible() {
+    console.log("Visible");
+    this.SetVal("Visible",1);
   }
 }
 
