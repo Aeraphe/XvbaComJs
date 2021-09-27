@@ -1,7 +1,7 @@
 import * as ref from "ref-napi";
 import { ApiOl32 } from "../api/Ol32/api";
 
-export const propType = {
+const propType = {
   PROPERTY_GET: 0x2,
   METHOD: 0x1,
   PROPERTY_PUT: 0x4,
@@ -10,31 +10,33 @@ export const propType = {
 
 let lastComCreate: any;
 
-interface IGui {
+interface IGuid {
   pointer: any;
   type: any;
   name: string;
 }
 
-let GUIList: Array<IGui> = [];
+//GUID Global Unique Identifier List for Created COMs
+let GUIDList: Array<IGuid> = [];
 
 export abstract class Unknow {
-  gui: IGui = { pointer: null, type: null, name: "" };
+  guid: IGuid = { pointer: null, type: null, name: "" };
+  //COM object name
   protected application = "";
 
   constructor(prop?: any) {
-    this.CreateObject(prop);
+    this.CreateInstace(prop);
   }
 
-  private CreateObject(prop?: any) {
-    GUIList.push(this.gui);
-    this.gui.type = propType.METHOD;
-    this.gui.name = this.constructor.name;
+  private CreateInstace(prop?: any) {
+    GUIDList.push(this.guid);
+    this.guid.type = propType.METHOD;
+    this.guid.name = this.constructor.name;
 
     if (prop !== undefined && typeof prop === "string") {
       this.application = prop || this.application;
     } else if (prop !== undefined && typeof prop !== "string") {
-      this.gui.pointer = prop;
+      this.guid.pointer = prop;
 
       return;
     }
@@ -50,7 +52,7 @@ export abstract class Unknow {
     const ProgID: any = Buffer.from(this.application + "\0", "ucs2");
     let responsePtr: any = ref.alloc(ref.types.uint32);
     const HRESULT = ApiOl32.XvbaCoCreateInstance(ProgID, responsePtr);
-    this.gui.pointer = responsePtr;
+    this.guid.pointer = responsePtr;
     lastComCreate = responsePtr;
     console.log(HRESULT);
   };
@@ -63,26 +65,36 @@ export abstract class Unknow {
       responsePtr,
       classNamePtr
     );
-    this.gui.pointer = responsePtr;
+    this.guid.pointer = responsePtr;
     lastComCreate = responsePtr;
     console.log(HRESULT);
   }
 
-  public ListGUI() {
-    return GUIList;
+  static ListGUID() {
+    return GUIDList;
   }
 
-  public CloseAllCOM() {
-    if (GUIList.length > 0) {
-      GUIList.forEach((gui) => {
-        console.log(ApiOl32.XvbaRelease(gui.pointer), gui.name);
+  /**
+   * Close all COM
+   * @param className
+   */
+  static CloseAllCOM(className?: string) {
+    if (GUIDList.length > 0) {
+      GUIDList.forEach((gui) => {
+        if (className != undefined) {
+          if (gui.name === className) {
+            console.log(ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
+          }
+        } else {
+          console.log(ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
+        }
       });
-      GUIList = [];
+      GUIDList = [];
     }
   }
 
   public CloseCOM() {
-    ApiOl32.XvbaRelease(this.gui.pointer);
-    this.gui = { pointer: null, type: null, name: "" };
+    ApiOl32.XvbaRelease(this.guid.pointer);
+    this.guid = { pointer: null, type: null, name: "" };
   }
 }
