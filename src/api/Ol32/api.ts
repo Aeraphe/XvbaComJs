@@ -13,6 +13,7 @@ const getDllFile = () => {
 export const ApiOl32 = ffi.Library(getDllFile(), {
   XvbaCoCreateInstance: ["int", ["pointer", "pointer"]],
   XvbaGetMethod: ["int", ["pointer", "pointer", "pointer"]],
+  XvbaGetPropertyRef: ["int", ["pointer", "pointer", "pointer"]],
   XvbaCall: [
     "int",
     ["pointer", "pointer", "pointer", "pointer", "pointer", "int"],
