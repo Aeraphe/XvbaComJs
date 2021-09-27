@@ -1,21 +1,26 @@
 import { XvbaCOM } from "../../XvbaComJs/XvbaCom";
+import { Sheets } from "./Sheets";
 import { WorkBooks } from "./WorkBooks";
-
 
 export class Excel extends XvbaCOM {
   public WorkBooks: WorkBooks;
+  private _Sheets: Sheets;
+
+  public get Sheets(): Sheets {
+    if (this._Sheets == undefined) {
+      this._Sheets = this.CreateObject(Sheets);
+      return this._Sheets;
+    } else {
+      return this._Sheets;
+    }
+  }
 
   constructor() {
     super("Excel.Application");
     this.WorkBooks = new WorkBooks();
   }
 
-  Visible() {
-    console.log("Visible");
-    this.SetVal("Visible",1);
-  }
+  Visible = () => this.SetBooleanValue("Visible", true);
+
+  Name = () => this.GetStrValue("Name");
 }
-
-
-
-

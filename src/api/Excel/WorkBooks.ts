@@ -5,7 +5,9 @@ export class WorkBooks extends XvbaCOM {
   
   
   constructor() {
+    
     super();
+ 
   }
 
   /**
@@ -14,7 +16,6 @@ export class WorkBooks extends XvbaCOM {
    * @returns
    */
   Open(filePath: string) {
-    const { objectPtr } = this.Call("Open", filePath);
-    return new WorkBook(objectPtr);
+    return this.CallMethodToGetObject("Open", filePath,WorkBook);
   }
 }

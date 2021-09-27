@@ -4,7 +4,7 @@ export class VBComponents extends XvbaCOM {
     private _Count: any;
   
     public get Count(): any {
-      this._Count = this.GetValue("Count");
+      this._Count = this.GetNumbValue("Count");
       return this._Count;
     }
   
