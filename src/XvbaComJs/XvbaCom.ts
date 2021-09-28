@@ -61,8 +61,8 @@ export abstract class XvbaCOM extends Unknow {
     return { pPropToCallPtr, pParamPtr, responsePtr, valuePtr, typeValue };
   }
 
-  /**
-   * Call to a COM Method that returns a XvbaCom Object
+    /**
+   * Call to a COM Method that returns a XvbaCom Object 
    *
    * @param propToCall:<string> Method Name
    * @param param : Array | string | number | Boolean
@@ -189,7 +189,8 @@ export abstract class XvbaCOM extends Unknow {
       if (response === undefined) {
         throw new Error("Error: GetNumbValue Fail");
       } else {
-        return response.value;
+
+        return response.value.deref();
       }
     } catch (error) {
       XvbaCOM.CloseAllCOM();
@@ -213,7 +214,7 @@ export abstract class XvbaCOM extends Unknow {
       if (response === undefined) {
         throw new Error("Error: GetStrValue Fail");
       } else {
-        return response.value;
+        return response.value.toString();
       }
     } catch (error) {
       XvbaCOM.CloseAllCOM();
