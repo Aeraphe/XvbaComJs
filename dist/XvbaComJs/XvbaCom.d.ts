@@ -8,12 +8,12 @@ export declare abstract class XvbaCOM extends Unknow {
     private Invoke;
     private _PreparCallParams;
     /**
-     * Call to a COM Method that returns a XvbaCom Object
-     *
-     * @param propToCall:<string> Method Name
-     * @param param : Array | string | number | Boolean
-     * @returns XvbaCom
-     */
+   * Call to a COM Method that returns a XvbaCom Object
+   *
+   * @param propToCall:<string> Method Name
+   * @param param : Array | string | number | Boolean
+   * @returns XvbaCom
+   */
     protected CallMethodToGetObject(propToCall: string, param: any, XCom: any): any;
     /**
      * Call to a COM Method that returns a String value

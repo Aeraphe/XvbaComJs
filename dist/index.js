@@ -56,7 +56,8 @@ class Unknow {
         }
     }
     InitializeMethods() {
-        const classNamePtr = Buffer.from("WorkBooks" + "\0", "ucs2");
+        const className = this.constructor.name;
+        const classNamePtr = Buffer.from(className + "\0", "ucs2");
         let responsePtr = ref.alloc(ref.types.uint32);
         const HRESULT = api_1.ApiOl32.XvbaGetMethod(lastComCreate, responsePtr, classNamePtr);
         this.guid.pointer = responsePtr;
@@ -67,19 +68,42 @@ class Unknow {
         return GUIDList;
     }
     /**
-     * Close all COM
+     * Close all Com
      * @param className
      */
-    static CloseAllCOM(className) {
+    static CloseAllCOM() {
         if (GUIDList.length > 0) {
-            GUIDList.forEach((gui) => {
+            GUIDList.map((gui) => {
+                console.log(api_1.ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
+            });
+            GUIDList = [];
+        }
+    }
+    /**
+     * Close all Com With Delay
+     * @param time: number default = 3000ms
+     */
+    static CloseAllCOMWithDelay(time = 3000) {
+        setTimeout(() => {
+            if (GUIDList.length > 0) {
+                GUIDList.map((gui) => {
+                    console.log(api_1.ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
+                });
+                GUIDList = [];
+            }
+        }, time);
+    }
+    /**
+     * Close all Com
+     * @param className
+     */
+    static ReleaseSelectedCom(className) {
+        if (GUIDList.length > 0) {
+            GUIDList.map((gui) => {
                 if (className != undefined) {
                     if (gui.name === className) {
                         console.log(api_1.ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
                     }
-                }
-                else {
-                    console.log(api_1.ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
                 }
             });
             GUIDList = [];
@@ -148,12 +172,12 @@ class XvbaCOM extends UnKnow_1.Unknow {
         return { pPropToCallPtr, pParamPtr, responsePtr, valuePtr, typeValue };
     }
     /**
-     * Call to a COM Method that returns a XvbaCom Object
-     *
-     * @param propToCall:<string> Method Name
-     * @param param : Array | string | number | Boolean
-     * @returns XvbaCom
-     */
+   * Call to a COM Method that returns a XvbaCom Object
+   *
+   * @param propToCall:<string> Method Name
+   * @param param : Array | string | number | Boolean
+   * @returns XvbaCom
+   */
     CallMethodToGetObject(propToCall, param = "", XCom) {
         try {
             let response = this.Invoke(propToCall, param);
@@ -266,7 +290,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
                 throw new Error("Error: GetNumbValue Fail");
             }
             else {
-                return response.value;
+                return response.value.deref();
             }
         }
         catch (error) {
@@ -287,7 +311,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
                 throw new Error("Error: GetStrValue Fail");
             }
             else {
-                return response.value;
+                return response.value.toString();
             }
         }
         catch (error) {
@@ -584,6 +608,49 @@ exports.ApiOl32 = ffi.Library(getDllFile(), {
 
 /***/ }),
 
+/***/ "./src/index.ts":
+/*!**********************!*\
+  !*** ./src/index.ts ***!
+  \**********************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Excel = void 0;
+const { Worker, isMainThread } = __webpack_require__(/*! worker_threads */ "worker_threads");
+const Excel_1 = __webpack_require__(/*! ./api/Excel/Excel */ "./src/api/Excel/Excel.ts");
+Object.defineProperty(exports, "Excel", ({ enumerable: true, get: function () { return Excel_1.Excel; } }));
+const test = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let excel = new Excel_1.Excel();
+        excel.Visible();
+        let Book = excel.WorkBooks.Open("F:\\Apps\\XvbaCom\\index.xlsb");
+        let total = excel.Sheets.Count();
+        let exName = excel.Name();
+        let totalComp = Book.VBProject.VBComponents.Count;
+        console.log(Excel_1.Excel.ListGUID());
+        console.log("--->", total, "---->", totalComp, "---", exName, Excel_1.Excel.ListGUID());
+        Excel_1.Excel.CloseAllCOMWithDelay();
+    }
+    catch (error) {
+        console.log(error);
+        Excel_1.Excel.CloseAllCOM();
+    }
+});
+test();
+
+
+/***/ }),
+
 /***/ "ffi-napi":
 /*!***************************!*\
   !*** external "ffi-napi" ***!
@@ -622,6 +689,16 @@ module.exports = require("os");
 
 module.exports = require("path");
 
+/***/ }),
+
+/***/ "worker_threads":
+/*!*********************************!*\
+  !*** external "worker_threads" ***!
+  \*********************************/
+/***/ ((module) => {
+
+module.exports = require("worker_threads");
+
 /***/ })
 
 /******/ 	});
@@ -644,46 +721,20 @@ module.exports = require("path");
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-(() => {
-var exports = __webpack_exports__;
-/*!**********************!*\
-  !*** ./src/index.ts ***!
-  \**********************/
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Excel = void 0;
-const Excel_1 = __webpack_require__(/*! ./api/Excel/Excel */ "./src/api/Excel/Excel.ts");
-Object.defineProperty(exports, "Excel", ({ enumerable: true, get: function () { return Excel_1.Excel; } }));
-try {
-    let excel = new Excel_1.Excel();
-    excel.Visible();
-    let Book = excel.WorkBooks.Open("F:\\Apps\\XvbaCom\\index.xlsb");
-    let total = excel.Sheets.Count();
-    let exName = excel.Name();
-    let totalComp = Book.VBProject.VBComponents.Count;
-    setTimeout(() => {
-        Excel_1.Excel.CloseAllCOM();
-    }, 3000);
-    console.log(Excel_1.Excel.ListGUID());
-    console.log("--->", total.deref(), "---->", totalComp.deref(), "---", exName.toString("utf-8"), Excel_1.Excel.ListGUID());
-}
-catch (error) {
-    console.log(error);
-    Excel_1.Excel.CloseAllCOM();
-}
-
-})();
-
-module.exports = __webpack_exports__;
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __webpack_require__("./src/index.ts");
+/******/ 	module.exports = __webpack_exports__;
+/******/ 	
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map

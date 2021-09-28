@@ -12,10 +12,20 @@ export declare abstract class Unknow {
     private InitializeMethods;
     static ListGUID(): IGuid[];
     /**
-     * Close all COM
+     * Close all Com
      * @param className
      */
-    static CloseAllCOM(className?: string): void;
+    static CloseAllCOM(): void;
+    /**
+     * Close all Com With Delay
+     * @param time: number default = 3000ms
+     */
+    static CloseAllCOMWithDelay(time?: number): void;
+    /**
+     * Close all Com
+     * @param className
+     */
+    static ReleaseSelectedCom(className?: string): void;
     CloseCOM(): void;
 }
 export {};
