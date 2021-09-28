@@ -10,6 +10,7 @@ interface IResponse {
 export enum PropType {
   INTEGER = 1,
   STRING = 0,
+  BOOLEAN = 2,
 }
 export abstract class XvbaCOM extends Unknow {
   constructor(application?: string) {
@@ -27,10 +28,10 @@ export abstract class XvbaCOM extends Unknow {
       const HRESULT = ApiOl32.XvbaCall(
         params.pPropToCallPtr,
         this.guid.pointer,
-        params.pParamPtr,
+        params.paramPtr,
         params.responsePtr,
         params.valuePtr,
-        params.typeValue
+        params.inputValueType
       );
 
       response = { objectPtr: params.responsePtr, value: params.valuePtr };
@@ -44,25 +45,64 @@ export abstract class XvbaCOM extends Unknow {
 
   private _PreparCallParams(propToCall: string, param: any = "", type: number) {
     const pPropToCallPtr: any = Buffer.from(propToCall + "\0", "ucs2");
-    const pParamPtr: any = Buffer.from(param + "\0", "ucs2");
+
     let responsePtr: any = ref.alloc(ref.types.uint32);
 
-    param = param === "" ? ref.NULL : param;
-    let typeValue = 0;
+    const {paramPtr,inputValueType}  = this._MakeInputBufferType(param);
+
+   
+
+    //Set the response Buffer type
     let valuePtr: any;
     if (type === PropType.INTEGER) {
-      typeValue = 0;
       valuePtr = ref.alloc(ref.types.int32);
     } else if (type === PropType.STRING) {
-      typeValue = 1;
       valuePtr = ref.alloc(ref.types.CString);
     }
 
-    return { pPropToCallPtr, pParamPtr, responsePtr, valuePtr, typeValue };
+   
+    return { pPropToCallPtr, paramPtr, responsePtr, valuePtr, inputValueType };
   }
 
-    /**
-   * Call to a COM Method that returns a XvbaCom Object 
+  /**
+   * Check if the param is number or string for make the correct buffer
+   * @param param: any
+   * @returns  { paramPtr: Buffer, inputValueType:number }
+   */
+  private _MakeInputBufferType(param: any) {
+    let paramPtr: any;
+    let inputValueType = PropType.STRING;
+
+    if (param !== undefined) {
+      console.log(param);
+      switch (typeof param) {
+        case "number":
+          console.log("number");
+          inputValueType = PropType.INTEGER;
+          paramPtr = ref.alloc(ref.types.int32, param);
+          break;
+
+        case "string":
+          console.log("string");
+          inputValueType = PropType.STRING;
+          paramPtr = Buffer.from(param + "\0", "ucs2");
+          break;
+
+        case "boolean":
+          console.log("boolean");
+          inputValueType = PropType.BOOLEAN;
+          paramPtr = ref.alloc(ref.types.bool, param);
+          break;
+      }
+    } else {
+      paramPtr = ref.NULL;
+    }
+
+    return { paramPtr, inputValueType };
+  }
+
+  /**
+   * Call to a COM Method that returns a XvbaCom Object
    *
    * @param propToCall:<string> Method Name
    * @param param : Array | string | number | Boolean
@@ -189,7 +229,6 @@ export abstract class XvbaCOM extends Unknow {
       if (response === undefined) {
         throw new Error("Error: GetNumbValue Fail");
       } else {
-
         return response.value.deref();
       }
     } catch (error) {
@@ -214,7 +253,7 @@ export abstract class XvbaCOM extends Unknow {
       if (response === undefined) {
         throw new Error("Error: GetStrValue Fail");
       } else {
-        return response.value.toString();
+        return response.value.deref();
       }
     } catch (error) {
       XvbaCOM.CloseAllCOM();
