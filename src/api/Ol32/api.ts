@@ -16,7 +16,7 @@ export const ApiOl32 = ffi.Library(getDllFile(), {
   XvbaGetPropertyRef: ["int", ["pointer", "pointer", "pointer"]],
   XvbaCall: [
     "int",
-    ["pointer", "pointer", "pointer", "pointer", "pointer", "int"],
+    ["pointer", "pointer", "pointer", "pointer", "pointer", "int","int"],
   ],
   XvbaSetVal: ["int", ["pointer", "pointer", "pointer", "int"]],
   XvbaRelease:["int",["pointer"]],
