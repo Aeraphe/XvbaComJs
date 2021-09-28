@@ -58,7 +58,8 @@ export abstract class Unknow {
   };
 
   private InitializeMethods() {
-    const classNamePtr: any = Buffer.from("WorkBooks" + "\0", "ucs2");
+    const className = this.constructor.name;
+    const classNamePtr: any = Buffer.from(className + "\0", "ucs2");
     let responsePtr: any = ref.alloc(ref.types.uint32);
     const HRESULT = ApiOl32.XvbaGetMethod(
       lastComCreate,
@@ -75,18 +76,44 @@ export abstract class Unknow {
   }
 
   /**
-   * Close all COM
+   * Close all Com
    * @param className
    */
-  static CloseAllCOM(className?: string) {
+  static CloseAllCOM() {
     if (GUIDList.length > 0) {
-      GUIDList.forEach((gui) => {
+      GUIDList.map((gui) => {
+        console.log(ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
+      });
+      GUIDList = [];
+    }
+  }
+
+  /**
+   * Close all Com With Delay
+   * @param time: number default = 3000ms
+   */
+  static CloseAllCOMWithDelay(time = 3000) {
+    setTimeout(() => {
+      if (GUIDList.length > 0) {
+        GUIDList.map((gui) => {
+          console.log(ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
+        });
+        GUIDList = [];
+      }
+    }, time);
+  }
+
+  /**
+   * Close all Com
+   * @param className
+   */
+  static ReleaseSelectedCom(className?: string) {
+    if (GUIDList.length > 0) {
+      GUIDList.map((gui) => {
         if (className != undefined) {
           if (gui.name === className) {
             console.log(ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
           }
-        } else {
-          console.log(ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
         }
       });
       GUIDList = [];
