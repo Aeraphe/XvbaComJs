@@ -8,34 +8,44 @@ interface IResponse {
 }
 
 export enum PropType {
-  INTEGER = 1,
   STRING = 0,
+  INTEGER = 1,
   BOOLEAN = 2,
 }
+
 export abstract class XvbaCOM extends Unknow {
   constructor(application?: string) {
     super(application);
   }
 
-  private Invoke(
+  /**
+   *
+   * @param propToCall <string> the name of the method | property | object to call IDispatch::Invoke
+   * @param param <string | number |boolean>
+   * @param type
+   * @returns
+   */
+  private _Invoke(
     propToCall: string,
-    param: any = "",
+    param: string | number | boolean | Array<any> = "",
     type: number = PropType.INTEGER
   ): IResponse | undefined {
     try {
+      let param2: any = param;
       let response: IResponse = { objectPtr: null, value: null };
-      const params = this._PreparCallParams(propToCall, param, type);
+      const params = this._PreparInvokeParams(propToCall, param, type);
       const HRESULT = ApiOl32.XvbaCall(
         params.pPropToCallPtr,
         this.guid.pointer,
         params.paramPtr,
         params.responsePtr,
         params.valuePtr,
-        params.inputValueType
+        params.inputValueType,
+        param2
       );
 
       response = { objectPtr: params.responsePtr, value: params.valuePtr };
-      console.log(HRESULT, " : ", propToCall);
+      console.log(HRESULT, " : ", propToCall, param);
       return response;
     } catch (error) {
       XvbaCOM.CloseAllCOM();
@@ -43,14 +53,16 @@ export abstract class XvbaCOM extends Unknow {
     }
   }
 
-  private _PreparCallParams(propToCall: string, param: any = "", type: number) {
+  private _PreparInvokeParams(
+    propToCall: string,
+    param: any = "",
+    type: number
+  ) {
     const pPropToCallPtr: any = Buffer.from(propToCall + "\0", "ucs2");
 
     let responsePtr: any = ref.alloc(ref.types.uint32);
 
-    const {paramPtr,inputValueType}  = this._MakeInputBufferType(param);
-
-   
+    const { paramPtr, inputValueType } = this._MakeInputBufferType(param);
 
     //Set the response Buffer type
     let valuePtr: any;
@@ -60,7 +72,6 @@ export abstract class XvbaCOM extends Unknow {
       valuePtr = ref.alloc(ref.types.CString);
     }
 
-   
     return { pPropToCallPtr, paramPtr, responsePtr, valuePtr, inputValueType };
   }
 
@@ -73,32 +84,55 @@ export abstract class XvbaCOM extends Unknow {
     let paramPtr: any;
     let inputValueType = PropType.STRING;
 
-    if (param !== undefined) {
-      console.log(param);
+    if (param !== undefined && param !== "") {
+ 
+      let bufferType: any;
       switch (typeof param) {
         case "number":
-          console.log("number");
           inputValueType = PropType.INTEGER;
-          paramPtr = ref.alloc(ref.types.int32, param);
+          bufferType = ref.types.long;
           break;
 
         case "string":
-          console.log("string");
           inputValueType = PropType.STRING;
-          paramPtr = Buffer.from(param + "\0", "ucs2");
+          bufferType = ref.types.CString;
           break;
 
         case "boolean":
-          console.log("boolean");
-          inputValueType = PropType.BOOLEAN;
-          paramPtr = ref.alloc(ref.types.bool, param);
+          inputValueType = PropType.INTEGER;
+          bufferType = ref.types.bool;
           break;
       }
+      paramPtr = ref.alloc(bufferType, param);
     } else {
+  
       paramPtr = ref.NULL;
+      inputValueType = 100;
     }
 
     return { paramPtr, inputValueType };
+  }
+
+  /**
+   *
+   * Set Value to COM Property
+   *
+   * @param propToCall <string> COM Property name
+   * @param value string | number value to set to the property
+   * @param type <PropType>
+   */
+  private _SetValue(propToCall: string, value: any = "", type: number) {
+    const propToCallPtr: any = Buffer.from(propToCall + "\0", "ucs2");
+
+    const { inputValueType, paramPtr } = this._MakeInputBufferType(value);
+
+    const HRESULT = ApiOl32.XvbaSetVal(
+      propToCallPtr,
+      this.guid.pointer,
+      paramPtr,
+      inputValueType
+    );
+    console.log(HRESULT);
   }
 
   /**
@@ -114,7 +148,7 @@ export abstract class XvbaCOM extends Unknow {
     XCom: any
   ) {
     try {
-      let response: IResponse | undefined = this.Invoke(propToCall, param);
+      let response: IResponse | undefined = this._Invoke(propToCall, param);
 
       if (response !== undefined) {
         return new XCom(response.objectPtr);
@@ -136,7 +170,7 @@ export abstract class XvbaCOM extends Unknow {
    */
   protected CallMethodToGetString(propToCall: string, param: any = "") {
     try {
-      const response: IResponse | undefined = this.Invoke(propToCall, param);
+      const response: IResponse | undefined = this._Invoke(propToCall, param);
       if (response !== undefined) {
         return response.value.toString();
       } else {
@@ -145,6 +179,24 @@ export abstract class XvbaCOM extends Unknow {
     } catch (error) {
       XvbaCOM.CloseAllCOM();
       throw new Error("Fail on CallMethodToGetString");
+    }
+  }
+  /**
+   * Call to a COM Method that return void
+   *
+   * @param propToCall:<string> Method Name
+   * @param param : Array | string | number | Boolean
+   */
+  protected CallMethodToGetVoid(propToCall: string, param: any = "") {
+    try {
+      const response: IResponse | undefined = this._Invoke(propToCall, param);
+      if (response !== undefined) {
+      } else {
+        throw new Error("Fail on CallMethodToGetNumber");
+      }
+    } catch (error) {
+      XvbaCOM.CloseAllCOM();
+      console.error(error);
     }
   }
 
@@ -157,7 +209,7 @@ export abstract class XvbaCOM extends Unknow {
    */
   protected CallMethodToGetNumber(propToCall: string, param: any = "") {
     try {
-      const response: IResponse | undefined = this.Invoke(propToCall, param);
+      const response: IResponse | undefined = this._Invoke(propToCall, param);
       if (response !== undefined) {
         return response.value.deref();
       } else {
@@ -200,7 +252,7 @@ export abstract class XvbaCOM extends Unknow {
    */
   protected CreateObject(XvbaCom: any) {
     try {
-      const response: IResponse | undefined = this.Invoke(XvbaCom.name);
+      const response: IResponse | undefined = this._Invoke(XvbaCom.name);
       if (response === undefined) {
         throw new Error("Error: GetObject Fail");
       } else {
@@ -219,9 +271,9 @@ export abstract class XvbaCOM extends Unknow {
    * @param prop <string> COM Property name
    * @returns
    */
-  protected GetNumbValue(prop: string) {
+  protected GetNumbValue(prop: string): number {
     try {
-      const response: IResponse | undefined = this.Invoke(
+      const response: IResponse | undefined = this._Invoke(
         prop,
         "",
         PropType.INTEGER
@@ -245,7 +297,7 @@ export abstract class XvbaCOM extends Unknow {
    */
   protected GetStrValue(prop: string) {
     try {
-      const response: IResponse | undefined = this.Invoke(
+      const response: IResponse | undefined = this._Invoke(
         prop,
         "",
         PropType.STRING
@@ -263,27 +315,6 @@ export abstract class XvbaCOM extends Unknow {
 
   /**
    *
-   * Set Value to COM Property
-   *
-   * @param propToCall <string> COM Property name
-   * @param value string | number value to set to the property
-   * @param type <PropType>
-   */
-  private SetValue(propToCall: string, value: any = "", type: number) {
-    const propToCallPtr: any = Buffer.from(propToCall + "\0", "ucs2");
-    const valuePtr: any = Buffer.from(value + "\0", "ucs2");
-
-    const HRESULT = ApiOl32.XvbaSetVal(
-      propToCallPtr,
-      this.guid.pointer,
-      valuePtr,
-      type
-    );
-    console.log(HRESULT);
-  }
-
-  /**
-   *
    * Set String Value to COM Property
    *
    * @param propToCall <string> COM Property name
@@ -292,7 +323,7 @@ export abstract class XvbaCOM extends Unknow {
    */
   protected SetStrValue(propToCall: string, value: string): void {
     try {
-      this.SetValue(propToCall, value, PropType.STRING);
+      this._SetValue(propToCall, value, PropType.STRING);
     } catch (error) {
       XvbaCOM.CloseAllCOM();
       throw new Error("Fail on SetNumbValue");
@@ -309,7 +340,7 @@ export abstract class XvbaCOM extends Unknow {
    */
   protected SetNumbValue(propToCall: string, value: number): void {
     try {
-      this.SetValue(propToCall, value, PropType.INTEGER);
+      this._SetValue(propToCall, value, PropType.INTEGER);
     } catch (error) {
       XvbaCOM.CloseAllCOM();
       throw new Error("Fail on SetNumbValue");
@@ -334,7 +365,7 @@ export abstract class XvbaCOM extends Unknow {
       } else {
         throw new Error("Error: Boolean value not set");
       }
-      return this.SetValue(propToCall, value, propType);
+      return this._SetValue(propToCall, value, propType);
     } catch (error) {
       XvbaCOM.CloseAllCOM();
       throw new Error("Fail on SetBooleanValue");
