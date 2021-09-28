@@ -3,7 +3,7 @@ import { XvbaCOM } from "../../XvbaComJs/XvbaCom";
 export class VBComponent extends XvbaCOM {
   private _Name: string;
 
-  private _Type: string;
+  private _Type: number;
 
   public get Name(): string {
     if (this._Name == undefined) {
@@ -12,9 +12,9 @@ export class VBComponent extends XvbaCOM {
     return this._Name;
   }
 
-  public get Type(): string {
+  public get Type(): number {
     if (this._Type == undefined) {
-      this._Type = this.GetStrValue("Type");
+      this._Type = this.GetNumbValue("Type");
     }
     return this._Type;
   }
@@ -27,5 +27,7 @@ export class VBComponent extends XvbaCOM {
   Export(compFilePath:string){
       return this.CallMethodToGetNumber("Export",compFilePath)
   }
+
+
 
 }

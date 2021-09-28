@@ -5,7 +5,10 @@ export class VBProject extends XvbaCOM {
     private _VBComponents: VBComponents;
   
     public get VBComponents(): VBComponents {
-      this._VBComponents = this.CreateObject(VBComponents);
+      if(this._VBComponents==undefined){
+        this._VBComponents = this.CreateObject(VBComponents);
+      }
+     
       return this._VBComponents;
     }
   
