@@ -1,4 +1,5 @@
 import { XvbaCOM } from "../../XvbaComJs/XvbaCom";
+import { VBComponent } from "./VBComponent";
 
 export class VBComponents extends XvbaCOM {
     private _Count: any;
@@ -10,6 +11,10 @@ export class VBComponents extends XvbaCOM {
   
     constructor(prop?: any) {
       super(prop);
+    }
+
+    Item(value:number):VBComponent{
+      return this.CallMethodToGetObject("Item",value,VBComponent);
     }
   }
   
