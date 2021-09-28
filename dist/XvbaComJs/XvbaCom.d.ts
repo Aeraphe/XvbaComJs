@@ -1,19 +1,35 @@
 import { Unknow } from "./UnKnow";
 export declare enum PropType {
-    INTEGER = 1,
     STRING = 0,
+    INTEGER = 1,
     BOOLEAN = 2
 }
 export declare abstract class XvbaCOM extends Unknow {
     constructor(application?: string);
-    private Invoke;
-    private _PreparCallParams;
+    /**
+     *
+     * @param propToCall <string> the name of the method | property | object to call IDispatch::Invoke
+     * @param param <string | number |boolean>
+     * @param type
+     * @returns
+     */
+    private _Invoke;
+    private _PreparInvokeParams;
     /**
      * Check if the param is number or string for make the correct buffer
      * @param param: any
      * @returns  { paramPtr: Buffer, inputValueType:number }
      */
     private _MakeInputBufferType;
+    /**
+     *
+     * Set Value to COM Property
+     *
+     * @param propToCall <string> COM Property name
+     * @param value string | number value to set to the property
+     * @param type <PropType>
+     */
+    private _SetValue;
     /**
      * Call to a COM Method that returns a XvbaCom Object
      *
@@ -30,6 +46,13 @@ export declare abstract class XvbaCOM extends Unknow {
      * @returns string
      */
     protected CallMethodToGetString(propToCall: string, param?: any): any;
+    /**
+     * Call to a COM Method that return void
+     *
+     * @param propToCall:<string> Method Name
+     * @param param : Array | string | number | Boolean
+     */
+    protected CallMethodToGetVoid(propToCall: string, param?: any): void;
     /**
      * Call to a COM Method that returns a Number Value
      *
@@ -58,7 +81,7 @@ export declare abstract class XvbaCOM extends Unknow {
      * @param prop <string> COM Property name
      * @returns
      */
-    protected GetNumbValue(prop: string): any;
+    protected GetNumbValue(prop: string): number;
     /**
      * Get COM string Property value
      *
@@ -66,15 +89,6 @@ export declare abstract class XvbaCOM extends Unknow {
      * @returns
      */
     protected GetStrValue(prop: string): any;
-    /**
-     *
-     * Set Value to COM Property
-     *
-     * @param propToCall <string> COM Property name
-     * @param value string | number value to set to the property
-     * @param type <PropType>
-     */
-    private SetValue;
     /**
      *
      * Set String Value to COM Property
