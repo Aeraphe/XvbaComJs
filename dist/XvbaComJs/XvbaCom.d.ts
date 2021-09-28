@@ -1,19 +1,26 @@
 import { Unknow } from "./UnKnow";
 export declare enum PropType {
     INTEGER = 1,
-    STRING = 0
+    STRING = 0,
+    BOOLEAN = 2
 }
 export declare abstract class XvbaCOM extends Unknow {
     constructor(application?: string);
     private Invoke;
     private _PreparCallParams;
     /**
-   * Call to a COM Method that returns a XvbaCom Object
-   *
-   * @param propToCall:<string> Method Name
-   * @param param : Array | string | number | Boolean
-   * @returns XvbaCom
-   */
+     * Check if the param is number or string for make the correct buffer
+     * @param param: any
+     * @returns  { paramPtr: Buffer, inputValueType:number }
+     */
+    private _MakeInputBufferType;
+    /**
+     * Call to a COM Method that returns a XvbaCom Object
+     *
+     * @param propToCall:<string> Method Name
+     * @param param : Array | string | number | Boolean
+     * @returns XvbaCom
+     */
     protected CallMethodToGetObject(propToCall: string, param: any, XCom: any): any;
     /**
      * Call to a COM Method that returns a String value
