@@ -8,4 +8,5 @@ export declare class Excel extends XvbaCOM {
     constructor();
     Visible: () => void;
     Name: () => any;
+    Quit: () => void;
 }

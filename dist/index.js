@@ -133,21 +133,29 @@ const ref = __webpack_require__(/*! ref-napi */ "ref-napi");
 const api_1 = __webpack_require__(/*! ../api/Ol32/api */ "./src/api/Ol32/api.ts");
 var PropType;
 (function (PropType) {
-    PropType[PropType["INTEGER"] = 1] = "INTEGER";
     PropType[PropType["STRING"] = 0] = "STRING";
+    PropType[PropType["INTEGER"] = 1] = "INTEGER";
     PropType[PropType["BOOLEAN"] = 2] = "BOOLEAN";
 })(PropType = exports.PropType || (exports.PropType = {}));
 class XvbaCOM extends UnKnow_1.Unknow {
     constructor(application) {
         super(application);
     }
-    Invoke(propToCall, param = "", type = PropType.INTEGER) {
+    /**
+     *
+     * @param propToCall <string> the name of the method | property | object to call IDispatch::Invoke
+     * @param param <string | number |boolean>
+     * @param type
+     * @returns
+     */
+    _Invoke(propToCall, param = "", type = PropType.INTEGER) {
         try {
+            let param2 = param;
             let response = { objectPtr: null, value: null };
-            const params = this._PreparCallParams(propToCall, param, type);
-            const HRESULT = api_1.ApiOl32.XvbaCall(params.pPropToCallPtr, this.guid.pointer, params.paramPtr, params.responsePtr, params.valuePtr, params.inputValueType);
+            const params = this._PreparInvokeParams(propToCall, param, type);
+            const HRESULT = api_1.ApiOl32.XvbaCall(params.pPropToCallPtr, this.guid.pointer, params.paramPtr, params.responsePtr, params.valuePtr, params.inputValueType, param2);
             response = { objectPtr: params.responsePtr, value: params.valuePtr };
-            console.log(HRESULT, " : ", propToCall);
+            console.log(HRESULT, " : ", propToCall, param);
             return response;
         }
         catch (error) {
@@ -155,7 +163,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
             console.error(error);
         }
     }
-    _PreparCallParams(propToCall, param = "", type) {
+    _PreparInvokeParams(propToCall, param = "", type) {
         const pPropToCallPtr = Buffer.from(propToCall + "\0", "ucs2");
         let responsePtr = ref.alloc(ref.types.uint32);
         const { paramPtr, inputValueType } = this._MakeInputBufferType(param);
@@ -177,30 +185,43 @@ class XvbaCOM extends UnKnow_1.Unknow {
     _MakeInputBufferType(param) {
         let paramPtr;
         let inputValueType = PropType.STRING;
-        if (param !== undefined) {
-            console.log(param);
+        if (param !== undefined && param !== "") {
+            let bufferType;
             switch (typeof param) {
                 case "number":
-                    console.log("number");
                     inputValueType = PropType.INTEGER;
-                    paramPtr = ref.alloc(ref.types.int32, param);
+                    bufferType = ref.types.int32;
                     break;
                 case "string":
-                    console.log("string");
                     inputValueType = PropType.STRING;
-                    paramPtr = Buffer.from(param + "\0", "ucs2");
+                    bufferType = ref.types.CString;
                     break;
                 case "boolean":
-                    console.log("boolean");
-                    inputValueType = PropType.BOOLEAN;
-                    paramPtr = ref.alloc(ref.types.bool, param);
+                    inputValueType = PropType.INTEGER;
+                    bufferType = ref.types.bool;
                     break;
             }
+            paramPtr = ref.alloc(bufferType, param);
         }
         else {
             paramPtr = ref.NULL;
+            inputValueType = 100;
         }
         return { paramPtr, inputValueType };
+    }
+    /**
+     *
+     * Set Value to COM Property
+     *
+     * @param propToCall <string> COM Property name
+     * @param value string | number value to set to the property
+     * @param type <PropType>
+     */
+    _SetValue(propToCall, value = "", type) {
+        const propToCallPtr = Buffer.from(propToCall + "\0", "ucs2");
+        const { inputValueType, paramPtr } = this._MakeInputBufferType(value);
+        const HRESULT = api_1.ApiOl32.XvbaSetVal(propToCallPtr, this.guid.pointer, paramPtr, inputValueType);
+        console.log(HRESULT);
     }
     /**
      * Call to a COM Method that returns a XvbaCom Object
@@ -211,7 +232,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
      */
     CallMethodToGetObject(propToCall, param = "", XCom) {
         try {
-            let response = this.Invoke(propToCall, param);
+            let response = this._Invoke(propToCall, param);
             if (response !== undefined) {
                 return new XCom(response.objectPtr);
             }
@@ -233,7 +254,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
      */
     CallMethodToGetString(propToCall, param = "") {
         try {
-            const response = this.Invoke(propToCall, param);
+            const response = this._Invoke(propToCall, param);
             if (response !== undefined) {
                 return response.value.toString();
             }
@@ -247,6 +268,26 @@ class XvbaCOM extends UnKnow_1.Unknow {
         }
     }
     /**
+     * Call to a COM Method that return void
+     *
+     * @param propToCall:<string> Method Name
+     * @param param : Array | string | number | Boolean
+     */
+    CallMethodToGetVoid(propToCall, param = "") {
+        try {
+            const response = this._Invoke(propToCall, param);
+            if (response !== undefined) {
+            }
+            else {
+                throw new Error("Fail on CallMethodToGetNumber");
+            }
+        }
+        catch (error) {
+            XvbaCOM.CloseAllCOM();
+            console.error(error);
+        }
+    }
+    /**
      * Call to a COM Method that returns a Number Value
      *
      * @param propToCall:<string> Method Name
@@ -255,7 +296,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
      */
     CallMethodToGetNumber(propToCall, param = "") {
         try {
-            const response = this.Invoke(propToCall, param);
+            const response = this._Invoke(propToCall, param);
             if (response !== undefined) {
                 return response.value.deref();
             }
@@ -294,7 +335,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
      */
     CreateObject(XvbaCom) {
         try {
-            const response = this.Invoke(XvbaCom.name);
+            const response = this._Invoke(XvbaCom.name);
             if (response === undefined) {
                 throw new Error("Error: GetObject Fail");
             }
@@ -316,7 +357,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
      */
     GetNumbValue(prop) {
         try {
-            const response = this.Invoke(prop, "", PropType.INTEGER);
+            const response = this._Invoke(prop, "", PropType.INTEGER);
             if (response === undefined) {
                 throw new Error("Error: GetNumbValue Fail");
             }
@@ -337,7 +378,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
      */
     GetStrValue(prop) {
         try {
-            const response = this.Invoke(prop, "", PropType.STRING);
+            const response = this._Invoke(prop, "", PropType.STRING);
             if (response === undefined) {
                 throw new Error("Error: GetStrValue Fail");
             }
@@ -352,20 +393,6 @@ class XvbaCOM extends UnKnow_1.Unknow {
     }
     /**
      *
-     * Set Value to COM Property
-     *
-     * @param propToCall <string> COM Property name
-     * @param value string | number value to set to the property
-     * @param type <PropType>
-     */
-    SetValue(propToCall, value = "", type) {
-        const propToCallPtr = Buffer.from(propToCall + "\0", "ucs2");
-        const valuePtr = Buffer.from(value + "\0", "ucs2");
-        const HRESULT = api_1.ApiOl32.XvbaSetVal(propToCallPtr, this.guid.pointer, valuePtr, type);
-        console.log(HRESULT);
-    }
-    /**
-     *
      * Set String Value to COM Property
      *
      * @param propToCall <string> COM Property name
@@ -374,7 +401,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
      */
     SetStrValue(propToCall, value) {
         try {
-            this.SetValue(propToCall, value, PropType.STRING);
+            this._SetValue(propToCall, value, PropType.STRING);
         }
         catch (error) {
             XvbaCOM.CloseAllCOM();
@@ -391,7 +418,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
      */
     SetNumbValue(propToCall, value) {
         try {
-            this.SetValue(propToCall, value, PropType.INTEGER);
+            this._SetValue(propToCall, value, PropType.INTEGER);
         }
         catch (error) {
             XvbaCOM.CloseAllCOM();
@@ -418,7 +445,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
             else {
                 throw new Error("Error: Boolean value not set");
             }
-            return this.SetValue(propToCall, value, propType);
+            return this._SetValue(propToCall, value, propType);
         }
         catch (error) {
             XvbaCOM.CloseAllCOM();
@@ -448,6 +475,7 @@ class Excel extends XvbaCom_1.XvbaCOM {
         super("Excel.Application");
         this.Visible = () => this.SetBooleanValue("Visible", true);
         this.Name = () => this.GetStrValue("Name");
+        this.Quit = () => this.CallMethodToGetVoid("Quit");
         this.WorkBooks = new WorkBooks_1.WorkBooks();
     }
     get Sheets() {
@@ -510,7 +538,7 @@ class VBComponent extends XvbaCom_1.XvbaCOM {
     }
     get Type() {
         if (this._Type == undefined) {
-            this._Type = this.GetStrValue("Type");
+            this._Type = this.GetNumbValue("Type");
         }
         return this._Type;
     }
@@ -567,7 +595,9 @@ class VBProject extends XvbaCom_1.XvbaCOM {
         super(prop);
     }
     get VBComponents() {
-        this._VBComponents = this.CreateObject(VBComponents_1.VBComponents);
+        if (this._VBComponents == undefined) {
+            this._VBComponents = this.CreateObject(VBComponents_1.VBComponents);
+        }
         return this._VBComponents;
     }
 }
@@ -668,7 +698,7 @@ exports.ApiOl32 = ffi.Library(getDllFile(), {
     XvbaGetPropertyRef: ["int", ["pointer", "pointer", "pointer"]],
     XvbaCall: [
         "int",
-        ["pointer", "pointer", "pointer", "pointer", "pointer", "int"],
+        ["pointer", "pointer", "void*", "pointer", "pointer", "int", "int"],
     ],
     XvbaSetVal: ["int", ["pointer", "pointer", "pointer", "int"]],
     XvbaRelease: ["int", ["pointer"]],
@@ -678,10 +708,10 @@ exports.ApiOl32 = ffi.Library(getDllFile(), {
 
 /***/ }),
 
-/***/ "./src/index.ts":
-/*!**********************!*\
-  !*** ./src/index.ts ***!
-  \**********************/
+/***/ "./src/example/excel.ts":
+/*!******************************!*\
+  !*** ./src/example/excel.ts ***!
+  \******************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -695,23 +725,44 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Excel = void 0;
-const Excel_1 = __webpack_require__(/*! ./api/Excel/Excel */ "./src/api/Excel/Excel.ts");
-Object.defineProperty(exports, "Excel", ({ enumerable: true, get: function () { return Excel_1.Excel; } }));
-const test = () => __awaiter(void 0, void 0, void 0, function* () {
+exports.tryExcel = void 0;
+const Excel_1 = __webpack_require__(/*! ../api/Excel/Excel */ "./src/api/Excel/Excel.ts");
+const tryExcel = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let excel = new Excel_1.Excel();
         excel.Visible();
         let Book = excel.WorkBooks.Open("F:\\Apps\\XvbaCom\\index.xlsb");
-        let total = excel.Sheets.Count();
+        let sheets = excel.Sheets;
+        let total = sheets.Count();
         console.log("--->", total);
         let exName = excel.Name();
         console.log("--->", exName);
         let totalComp = Book.VBProject.VBComponents.Count;
         console.log("--->", totalComp);
-        let comp = Book.VBProject.VBComponents.Item(3);
-        const compName = comp.Name;
-        console.log(compName);
+        for (let index = 0; index < totalComp; index++) {
+            const vbComponent = Book.VBProject.VBComponents.Item(index + 1);
+            const compName = vbComponent.Name;
+            let compFileName = "";
+            switch (vbComponent.Type) {
+                case 1:
+                    compFileName = compName + ".bas";
+                    break;
+                case 2:
+                    compFileName = compName + ".cls";
+                    break;
+                case 3:
+                    compFileName = compName + ".frm";
+                    break;
+                case 100:
+                    compFileName = compName + ".cls";
+                    break;
+                default:
+                    break;
+            }
+            const fileExport = "F:\\Apps\\XvbaCom\\vba\\" + compFileName;
+            vbComponent.Export(fileExport);
+        }
+        excel.Quit();
         Excel_1.Excel.CloseAllCOMWithDelay();
     }
     catch (error) {
@@ -719,7 +770,7 @@ const test = () => __awaiter(void 0, void 0, void 0, function* () {
         Excel_1.Excel.CloseAllCOM();
     }
 });
-test();
+exports.tryExcel = tryExcel;
 
 
 /***/ }),
@@ -791,13 +842,21 @@ module.exports = require("path");
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/index.ts");
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+var exports = __webpack_exports__;
+/*!**********************!*\
+  !*** ./src/index.ts ***!
+  \**********************/
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const excel_1 = __webpack_require__(/*! ./example/excel */ "./src/example/excel.ts");
+(0, excel_1.tryExcel)();
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
