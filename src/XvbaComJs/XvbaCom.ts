@@ -90,7 +90,7 @@ export abstract class XvbaCOM extends Unknow {
       switch (typeof param) {
         case "number":
           inputValueType = PropType.INTEGER;
-          bufferType = ref.types.long;
+          bufferType = ref.types.int32;
           break;
 
         case "string":
