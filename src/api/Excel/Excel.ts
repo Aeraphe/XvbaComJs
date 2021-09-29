@@ -3,6 +3,7 @@ import { Sheets } from "./Sheets";
 import { WorkBooks } from "./WorkBooks";
 
 export class Excel extends XvbaCOM {
+  
   public WorkBooks: WorkBooks;
   private _Sheets: Sheets;
 
@@ -23,4 +24,6 @@ export class Excel extends XvbaCOM {
   Visible = () => this.SetBooleanValue("Visible", true);
 
   Name = () => this.GetStrValue("Name");
+
+  Quit = () => this.CallMethodToGetVoid("Quit");
 }
