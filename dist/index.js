@@ -767,7 +767,7 @@ const tryExcel = () => __awaiter(void 0, void 0, void 0, function* () {
     }
     catch (error) {
         console.log(error);
-        Excel_1.Excel.CloseAllCOM();
+        Excel_1.Excel.CloseAllCOMWithDelay();
     }
 });
 exports.tryExcel = tryExcel;
