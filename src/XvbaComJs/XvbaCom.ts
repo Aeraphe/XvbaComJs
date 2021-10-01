@@ -57,7 +57,7 @@ export abstract class XvbaCOM extends Unknow {
       console.log(HRESULT, " : ", propToCall, param);
       return response;
     } catch (error) {
-      XvbaCOM.CloseAllCOM();
+      XvbaCOM.ReleaseAllCOM();
       console.error(error);
     }
   }
@@ -159,7 +159,7 @@ export abstract class XvbaCOM extends Unknow {
         throw new Error("Fail on CallMethodToGetObject: undefined");
       }
     } catch (error) {
-      XvbaCOM.CloseAllCOM();
+      XvbaCOM.ReleaseAllCOM();
       throw new Error("Fail on CallMethodToGetObject");
     }
   }
@@ -180,7 +180,7 @@ export abstract class XvbaCOM extends Unknow {
         throw new Error("");
       }
     } catch (error) {
-      XvbaCOM.CloseAllCOM();
+      XvbaCOM.ReleaseAllCOM();
       throw new Error("Fail on CallMethodToGetString");
     }
   }
@@ -198,7 +198,7 @@ export abstract class XvbaCOM extends Unknow {
         throw new Error("Fail on CallMethodToGetNumber");
       }
     } catch (error) {
-      XvbaCOM.CloseAllCOM();
+      XvbaCOM.ReleaseAllCOM();
       console.error(error);
     }
   }
@@ -219,7 +219,7 @@ export abstract class XvbaCOM extends Unknow {
         throw new Error("Fail on CallMethodToGetNumber");
       }
     } catch (error) {
-      XvbaCOM.CloseAllCOM();
+      XvbaCOM.ReleaseAllCOM();
       console.error(error);
     }
   }
@@ -243,7 +243,7 @@ export abstract class XvbaCOM extends Unknow {
       console.log("getPropByRef", HRESULT);
       return responsePtr;
     } catch (error) {
-      XvbaCOM.CloseAllCOM();
+      XvbaCOM.ReleaseAllCOM();
       console.error(error);
     }
   }
@@ -263,7 +263,7 @@ export abstract class XvbaCOM extends Unknow {
         return new XvbaCom(response.objectPtr);
       }
     } catch (error) {
-      XvbaCOM.CloseAllCOM();
+      XvbaCOM.ReleaseAllCOM();
       console.error(error);
     }
   }
@@ -289,7 +289,7 @@ export abstract class XvbaCOM extends Unknow {
         return response.value.deref();
       }
     } catch (error) {
-      XvbaCOM.CloseAllCOM();
+      XvbaCOM.ReleaseAllCOM();
       throw new Error("Fail on GetNumbValue");
     }
   }
@@ -314,7 +314,7 @@ export abstract class XvbaCOM extends Unknow {
         return response.value.deref();
       }
     } catch (error) {
-      XvbaCOM.CloseAllCOM();
+      XvbaCOM.ReleaseAllCOM();
       console.error(error);
     }
   }
@@ -331,7 +331,7 @@ export abstract class XvbaCOM extends Unknow {
     try {
       this._SetValue(propToCall, value, PropType.STRING);
     } catch (error) {
-      XvbaCOM.CloseAllCOM();
+      XvbaCOM.ReleaseAllCOM();
       throw new Error("Fail on SetNumbValue");
     }
   }
@@ -348,7 +348,7 @@ export abstract class XvbaCOM extends Unknow {
     try {
       this._SetValue(propToCall, value, PropType.INTEGER);
     } catch (error) {
-      XvbaCOM.CloseAllCOM();
+      XvbaCOM.ReleaseAllCOM();
       throw new Error("Fail on SetNumbValue");
     }
   }
@@ -373,7 +373,7 @@ export abstract class XvbaCOM extends Unknow {
       }
       return this._SetValue(propToCall, value, propType);
     } catch (error) {
-      XvbaCOM.CloseAllCOM();
+      XvbaCOM.ReleaseAllCOM();
       throw new Error("Fail on SetBooleanValue");
     }
   }

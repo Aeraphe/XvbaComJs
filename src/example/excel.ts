@@ -49,9 +49,9 @@ export const tryExcel = async () => {
     }
 
     excel.Quit();
-    Excel.CloseAllCOMWithDelay();
+    Excel.ReleaseAllCOMWithDelay();
   } catch (error) {
     console.log(error);
-    Excel.CloseAllCOMWithDelay();
+    Excel.ReleaseAllCOMWithDelay();
   }
 };
