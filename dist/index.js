@@ -4303,7 +4303,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
             return response;
         }
         catch (error) {
-            XvbaCOM.CloseAllCOM();
+            XvbaCOM.ReleaseAllCOM();
             console.error(error);
         }
     }
@@ -4385,7 +4385,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
             }
         }
         catch (error) {
-            XvbaCOM.CloseAllCOM();
+            XvbaCOM.ReleaseAllCOM();
             throw new Error("Fail on CallMethodToGetObject");
         }
     }
@@ -4407,7 +4407,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
             }
         }
         catch (error) {
-            XvbaCOM.CloseAllCOM();
+            XvbaCOM.ReleaseAllCOM();
             throw new Error("Fail on CallMethodToGetString");
         }
     }
@@ -4427,7 +4427,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
             }
         }
         catch (error) {
-            XvbaCOM.CloseAllCOM();
+            XvbaCOM.ReleaseAllCOM();
             console.error(error);
         }
     }
@@ -4449,7 +4449,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
             }
         }
         catch (error) {
-            XvbaCOM.CloseAllCOM();
+            XvbaCOM.ReleaseAllCOM();
             console.error(error);
         }
     }
@@ -4468,7 +4468,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
             return responsePtr;
         }
         catch (error) {
-            XvbaCOM.CloseAllCOM();
+            XvbaCOM.ReleaseAllCOM();
             console.error(error);
         }
     }
@@ -4489,7 +4489,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
             }
         }
         catch (error) {
-            XvbaCOM.CloseAllCOM();
+            XvbaCOM.ReleaseAllCOM();
             console.error(error);
         }
     }
@@ -4512,7 +4512,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
             }
         }
         catch (error) {
-            XvbaCOM.CloseAllCOM();
+            XvbaCOM.ReleaseAllCOM();
             throw new Error("Fail on GetNumbValue");
         }
     }
@@ -4534,7 +4534,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
             }
         }
         catch (error) {
-            XvbaCOM.CloseAllCOM();
+            XvbaCOM.ReleaseAllCOM();
             console.error(error);
         }
     }
@@ -4551,7 +4551,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
             this._SetValue(propToCall, value, PropType.STRING);
         }
         catch (error) {
-            XvbaCOM.CloseAllCOM();
+            XvbaCOM.ReleaseAllCOM();
             throw new Error("Fail on SetNumbValue");
         }
     }
@@ -4568,7 +4568,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
             this._SetValue(propToCall, value, PropType.INTEGER);
         }
         catch (error) {
-            XvbaCOM.CloseAllCOM();
+            XvbaCOM.ReleaseAllCOM();
             throw new Error("Fail on SetNumbValue");
         }
     }
@@ -4595,7 +4595,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
             return this._SetValue(propToCall, value, propType);
         }
         catch (error) {
-            XvbaCOM.CloseAllCOM();
+            XvbaCOM.ReleaseAllCOM();
             throw new Error("Fail on SetBooleanValue");
         }
     }
