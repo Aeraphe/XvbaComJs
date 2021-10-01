@@ -1,8 +1,9 @@
 {
-  "name": "xvbacomjs",
-  "version": "1.0.0",
-  "description": "Create a Windows COM with Typescript. (Already Include Excel Library and Kernel32)",
+  "name": "xvba-com",
+  "version": "1.0.1b",
+  "description": "Create a Windows COM like ExcelXvba (excel-xvba)",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack --mode development --watch "
@@ -11,10 +12,18 @@
     "type": "git",
     "url": "git+https://github.com/Aeraphe/XvbaCom.git"
   },
-  "keywords": ["xvba","vba","excel","win32","ol32","word","powerpoint"],
+  "keywords": [
+    "xvba",
+    "vba",
+    "excel",
+    "win32",
+    "ol32",
+    "word",
+    "powerpoint"
+  ],
   "author": "Alberto Eduardo de Castro Oliveira",
-  "email" :"albeto.aeraphe@gmail.com",
-  "license": "ISC",
+  "email": "albeto.aeraphe@gmail.com",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/Aeraphe/XvbaCom/issues"
   },
@@ -22,6 +31,7 @@
   "devDependencies": {
     "@types/ffi-napi": "^4.0.4",
     "@types/ref-napi": "^3.0.4",
+    "copy-webpack-plugin": "^9.0.1",
     "ts-loader": "^9.2.6",
     "typescript": "^4.4.3",
     "webpack": "^5.53.0",
@@ -29,6 +39,10 @@
   },
   "dependencies": {
     "dotenv": "^10.0.0",
-    "ffi-napi": "^4.0.3"
+    "ffi-napi": "^4.0.3",
+    "ref-array-di": "^1.2.2",
+    "ref-array-napi": "^1.2.2",
+    "ref-struct-di": "^1.1.1",
+    "ref-struct-napi": "^1.1.1"
   }
 }

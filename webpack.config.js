@@ -6,11 +6,27 @@ require('dotenv').config();
 
 const path = require('path');
 
-const TerserPlugin = require('terser-webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
+
+const copyFiles  = new CopyPlugin({
+  patterns: [
+    {
+      from: "*.md",
+      to: "./",
+    },
+    {
+      from: "*package.json",
+      to: "./",
+    },
+  ],
+});
+
 const env = process.env;
 
 console.log(env.NODE_ENV);
 const pl = [];
+
 const ugyfy = () => {
   if (env.NODE_ENV === "DEV") {
     console.log("DEV");
@@ -29,7 +45,7 @@ ugyfy();
 
 /**@type {import('webpack').Configuration}*/
 const config = {
-  plugins: pl,
+  plugins: [...pl,copyFiles],
   optimization: {
     minimize: env.NODE_ENV === "DEV" ? false : true,
 
@@ -43,7 +59,7 @@ const config = {
   output: {
     // the bundle is stored in the 'dist' folder (check package.json), ?? -> https://webpack.js.org/configuration/output/
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js',
+    filename: './[name].js',
     libraryTarget: 'commonjs2',
     devtoolModuleFilenameTemplate: '../[resource-path]'
   },
