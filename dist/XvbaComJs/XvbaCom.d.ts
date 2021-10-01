@@ -10,7 +10,7 @@ export declare abstract class XvbaCOM extends Unknow {
     /**
      *
      * @param propToCall <string> the name of the method | property | object to call IDispatch::Invoke
-     * @param param <string | number |boolean>
+     * @param param : arguments is an Array-like object
      * @param type
      * @returns
      */
@@ -35,33 +35,33 @@ export declare abstract class XvbaCOM extends Unknow {
      * Call to a COM Method that returns a XvbaCom Object
      *
      * @param propToCall:<string> Method Name
-     * @param param : Array | string | number | Boolean
+     * @param args : arguments is an Array-like object <string | number | boolean >
      * @returns XvbaCom
      */
-    protected CallMethodToGetObject(propToCall: string, XCom: any, ...param: any): any;
+    protected CallMethodToGetObject(propToCall: string, XCom: any, ...args: any): any;
     /**
      * Call to a COM Method that returns a String value
      *
      * @param propToCall:<string> Method Name
-     * @param param : Array | string | number | Boolean
+     * @param args : arguments is an Array-like object <string | number | boolean >
      * @returns string
      */
-    protected CallMethodToGetString(propToCall: string, ...param: any): any;
+    protected CallMethodToGetString(propToCall: string, ...args: any): any;
     /**
      * Call to a COM Method that return void
      *
      * @param propToCall:<string> Method Name
-     * @param param : Array | string | number | Boolean
+     * @param args : arguments is an Array-like object <string | number | boolean >
      */
     protected CallMethodToGetVoid(propToCall: string, ...param: any): void;
     /**
      * Call to a COM Method that returns a Number Value
      *
      * @param propToCall:<string> Method Name
-     * @param param : Array | string | number | Boolean
+     * @param args : arguments is an Array-like object <string | number | boolean >
      * @returns number
      */
-    protected CallMethodToGetNumber(propToCall: string, ...param: any): any;
+    protected CallMethodToGetNumber(propToCall: string, ...args: any): any;
     /**
      * Get COM property/Object by name
      *
@@ -72,24 +72,27 @@ export declare abstract class XvbaCOM extends Unknow {
     /**
      * Create COM object
      * @param XvbaCom <XvbaCom>
+     * @param args : arguments is an Array-like object <string | number | boolean >
      * @returns <XvbaCom>
      */
-    protected CreateObject(XvbaCom: any, ...param: any): any;
+    protected CreateObject(XvbaCom: any, ...args: any): any;
     /**
      * Get COM number Property value by
      * pass COM property name
      *
      * @param prop <string> COM Property name
+     * @param args : arguments is an Array-like object <string | number | boolean >
      * @returns
      */
-    protected GetNumbValue(prop: string, ...param: any): number;
+    protected GetNumbValue(prop: string, ...args: any): number;
     /**
      * Get COM string Property value
      *
      * @param prop <string> COM Property name
+     * @param args : arguments is an Array-like object <string | number | boolean >
      * @returns
      */
-    protected GetStrValue(prop: string, ...param: any): any;
+    protected GetStrValue(prop: string, ...args: any): any;
     /**
      *
      * Set String Value to COM Property
@@ -117,6 +120,19 @@ export declare abstract class XvbaCOM extends Unknow {
      * @returns void
      */
     protected SetBooleanValue(propToCall: string, value: Boolean): void;
+    /**
+     * Check the param type receive from  functions and return a number
+     * correspond to the type in C++
+     * @param value
+     * @returns
+     */
     private _GetParamType;
+    /**
+     *
+     * Receive args from functions and convert on Array of Struct for C++
+     *
+     * @param args Array<any>
+     * @returns
+     */
     private _MakeStructArrayOfParams;
 }

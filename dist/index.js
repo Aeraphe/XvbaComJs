@@ -4266,7 +4266,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
     /**
      *
      * @param propToCall <string> the name of the method | property | object to call IDispatch::Invoke
-     * @param param <string | number |boolean>
+     * @param param : arguments is an Array-like object
      * @param type
      * @returns
      */
@@ -4349,12 +4349,12 @@ class XvbaCOM extends UnKnow_1.Unknow {
      * Call to a COM Method that returns a XvbaCom Object
      *
      * @param propToCall:<string> Method Name
-     * @param param : Array | string | number | Boolean
+     * @param args : arguments is an Array-like object <string | number | boolean >
      * @returns XvbaCom
      */
-    CallMethodToGetObject(propToCall, XCom, ...param) {
+    CallMethodToGetObject(propToCall, XCom, ...args) {
         try {
-            let response = this._Invoke(propToCall, param);
+            let response = this._Invoke(propToCall, args);
             if (response !== undefined) {
                 return new XCom(response.objectPtr);
             }
@@ -4371,12 +4371,12 @@ class XvbaCOM extends UnKnow_1.Unknow {
      * Call to a COM Method that returns a String value
      *
      * @param propToCall:<string> Method Name
-     * @param param : Array | string | number | Boolean
+     * @param args : arguments is an Array-like object <string | number | boolean >
      * @returns string
      */
-    CallMethodToGetString(propToCall, ...param) {
+    CallMethodToGetString(propToCall, ...args) {
         try {
-            const response = this._Invoke(propToCall, param);
+            const response = this._Invoke(propToCall, args);
             if (response !== undefined) {
                 return response.value.toString();
             }
@@ -4393,7 +4393,7 @@ class XvbaCOM extends UnKnow_1.Unknow {
      * Call to a COM Method that return void
      *
      * @param propToCall:<string> Method Name
-     * @param param : Array | string | number | Boolean
+     * @param args : arguments is an Array-like object <string | number | boolean >
      */
     CallMethodToGetVoid(propToCall, ...param) {
         try {
@@ -4413,12 +4413,12 @@ class XvbaCOM extends UnKnow_1.Unknow {
      * Call to a COM Method that returns a Number Value
      *
      * @param propToCall:<string> Method Name
-     * @param param : Array | string | number | Boolean
+     * @param args : arguments is an Array-like object <string | number | boolean >
      * @returns number
      */
-    CallMethodToGetNumber(propToCall, ...param) {
+    CallMethodToGetNumber(propToCall, ...args) {
         try {
-            const response = this._Invoke(propToCall, param);
+            const response = this._Invoke(propToCall, args);
             if (response !== undefined) {
                 return response.value.deref();
             }
@@ -4453,11 +4453,12 @@ class XvbaCOM extends UnKnow_1.Unknow {
     /**
      * Create COM object
      * @param XvbaCom <XvbaCom>
+     * @param args : arguments is an Array-like object <string | number | boolean >
      * @returns <XvbaCom>
      */
-    CreateObject(XvbaCom, ...param) {
+    CreateObject(XvbaCom, ...args) {
         try {
-            const response = this._Invoke(XvbaCom.name, param);
+            const response = this._Invoke(XvbaCom.name, args);
             if (response === undefined) {
                 throw new Error("Error: GetObject Fail");
             }
@@ -4475,11 +4476,12 @@ class XvbaCOM extends UnKnow_1.Unknow {
      * pass COM property name
      *
      * @param prop <string> COM Property name
+     * @param args : arguments is an Array-like object <string | number | boolean >
      * @returns
      */
-    GetNumbValue(prop, ...param) {
+    GetNumbValue(prop, ...args) {
         try {
-            const response = this._Invoke(prop, param, PropType.INTEGER);
+            const response = this._Invoke(prop, args, PropType.INTEGER);
             if (response === undefined) {
                 throw new Error("Error: GetNumbValue Fail");
             }
@@ -4496,11 +4498,12 @@ class XvbaCOM extends UnKnow_1.Unknow {
      * Get COM string Property value
      *
      * @param prop <string> COM Property name
+     * @param args : arguments is an Array-like object <string | number | boolean >
      * @returns
      */
-    GetStrValue(prop, ...param) {
+    GetStrValue(prop, ...args) {
         try {
-            const response = this._Invoke(prop, param, PropType.STRING);
+            const response = this._Invoke(prop, args, PropType.STRING);
             if (response === undefined) {
                 throw new Error("Error: GetStrValue Fail");
             }
@@ -4574,9 +4577,15 @@ class XvbaCOM extends UnKnow_1.Unknow {
             throw new Error("Fail on SetBooleanValue");
         }
     }
-    _GetParamType(param) {
+    /**
+     * Check the param type receive from  functions and return a number
+     * correspond to the type in C++
+     * @param value
+     * @returns
+     */
+    _GetParamType(value) {
         let type;
-        switch (typeof param) {
+        switch (typeof value) {
             case "number":
                 type = PropType.INTEGER;
                 break;
@@ -4592,6 +4601,13 @@ class XvbaCOM extends UnKnow_1.Unknow {
         }
         return { type };
     }
+    /**
+     *
+     * Receive args from functions and convert on Array of Struct for C++
+     *
+     * @param args Array<any>
+     * @returns
+     */
     _MakeStructArrayOfParams(args) {
         if (args.length !== 0) {
             let structData = StructType({
