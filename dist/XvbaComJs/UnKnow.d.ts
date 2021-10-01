@@ -10,22 +10,44 @@ export declare abstract class Unknow {
     private CreateInstace;
     private CreateTheFirstCom;
     private InitializeMethods;
+    /**
+     * List of all COM objects create in C++
+     * @returns
+     */
     static ListGUID(): IGuid[];
     /**
-     * Close all Com
-     * @param className
+     * Release all COM
+     *
+     * C++ has no garbage collection and
+     * has to manually managed memory allocation/deallocation
+     *
      */
-    static CloseAllCOM(): void;
+    static ReleaseAllCOM(): void;
     /**
-     * Close all Com With Delay
+     * Release all COM With Delay
+     *
+     * C++ has no garbage collection and
+     * has to manually managed memory allocation/deallocation
+     * Some cases the delay on Release COMs is needed
+     *
      * @param time: number default = 3000ms
      */
-    static CloseAllCOMWithDelay(time?: number): void;
+    static ReleaseAllCOMWithDelay(time?: number): void;
     /**
-     * Close all Com
+     * Release all COM
+     *
+     * C++ has no garbage collection and
+     * has to manually managed memory allocation/deallocation
      * @param className
      */
     static ReleaseSelectedCom(className?: string): void;
-    CloseCOM(): void;
+    /**
+     * Release all COM
+     *
+     * C++ has no garbage collection and
+     * has to manually managed memory allocation/deallocation
+     * @param className
+     */
+    ReleaseCOM(): void;
 }
 export {};

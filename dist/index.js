@@ -4182,14 +4182,21 @@ class Unknow {
         lastComCreate = responsePtr;
         console.log(HRESULT);
     }
+    /**
+     * List of all COM objects create in C++
+     * @returns
+     */
     static ListGUID() {
         return GUIDList;
     }
     /**
-     * Close all Com
-     * @param className
+     * Release all COM
+     *
+     * C++ has no garbage collection and
+     * has to manually managed memory allocation/deallocation
+     *
      */
-    static CloseAllCOM() {
+    static ReleaseAllCOM() {
         if (GUIDList.length > 0) {
             GUIDList.map((gui) => {
                 console.log(api_1.ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
@@ -4198,10 +4205,15 @@ class Unknow {
         }
     }
     /**
-     * Close all Com With Delay
+     * Release all COM With Delay
+     *
+     * C++ has no garbage collection and
+     * has to manually managed memory allocation/deallocation
+     * Some cases the delay on Release COMs is needed
+     *
      * @param time: number default = 3000ms
      */
-    static CloseAllCOMWithDelay(time = 3000) {
+    static ReleaseAllCOMWithDelay(time = 3000) {
         setTimeout(() => {
             if (GUIDList.length > 0) {
                 GUIDList.map((gui) => {
@@ -4212,7 +4224,10 @@ class Unknow {
         }, time);
     }
     /**
-     * Close all Com
+     * Release all COM
+     *
+     * C++ has no garbage collection and
+     * has to manually managed memory allocation/deallocation
      * @param className
      */
     static ReleaseSelectedCom(className) {
@@ -4227,7 +4242,14 @@ class Unknow {
             GUIDList = [];
         }
     }
-    CloseCOM() {
+    /**
+     * Release all COM
+     *
+     * C++ has no garbage collection and
+     * has to manually managed memory allocation/deallocation
+     * @param className
+     */
+    ReleaseCOM() {
         api_1.ApiOl32.XvbaRelease(this.guid.pointer);
         this.guid = { pointer: null, type: null, name: "" };
     }
