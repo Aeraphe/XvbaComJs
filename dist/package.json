@@ -1,6 +1,6 @@
 {
   "name": "xvba-com",
-  "version": "1.0.1b",
+  "version": "1.0.2b",
   "description": "Create a Windows COM like ExcelXvba (excel-xvba)",
   "main": "index.js",
   "types": "index.d.ts",
