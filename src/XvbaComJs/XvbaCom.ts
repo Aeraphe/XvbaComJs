@@ -1,5 +1,7 @@
 import { Unknow } from "./UnKnow";
 import * as ref from "ref-napi";
+let ArrayType = require("ref-array-di")(ref);
+var StructType = require("ref-struct-di")(ref);
 import { ApiOl32 } from "../api/Ol32/api";
 
 interface IResponse {
@@ -11,6 +13,7 @@ export enum PropType {
   STRING = 0,
   INTEGER = 1,
   BOOLEAN = 2,
+  NULL = 100,
 }
 
 export abstract class XvbaCOM extends Unknow {
@@ -27,24 +30,29 @@ export abstract class XvbaCOM extends Unknow {
    */
   private _Invoke(
     propToCall: string,
-    param: string | number | boolean | Array<any> = "",
-    type: number = PropType.INTEGER
+    param?: any,
+    responseVariableType: number = PropType.INTEGER
   ): IResponse | undefined {
     try {
-      let param2: any = param;
       let response: IResponse = { objectPtr: null, value: null };
-      const params = this._PreparInvokeParams(propToCall, param, type);
+      const inputPtr = this._PreparInvokeParams(
+        propToCall,
+        param,
+        responseVariableType
+      );
+      const { paramsArrayStrucPtr, totalArgs } =
+        this._MakeStructArrayOfParams(param);
       const HRESULT = ApiOl32.XvbaCall(
-        params.pPropToCallPtr,
+        inputPtr.pPropToCallPtr,
         this.guid.pointer,
-        params.paramPtr,
-        params.responsePtr,
-        params.valuePtr,
-        params.inputValueType,
-        param2
+        paramsArrayStrucPtr,
+        inputPtr.responsePtr,
+        inputPtr.valuePtr,
+        inputPtr.inputValueType,
+        totalArgs
       );
 
-      response = { objectPtr: params.responsePtr, value: params.valuePtr };
+      response = { objectPtr: inputPtr.responsePtr, value: inputPtr.valuePtr };
       console.log(HRESULT, " : ", propToCall, param);
       return response;
     } catch (error) {
@@ -62,7 +70,7 @@ export abstract class XvbaCOM extends Unknow {
 
     let responsePtr: any = ref.alloc(ref.types.uint32);
 
-    const { paramPtr, inputValueType } = this._MakeInputBufferType(param);
+    let inputValueType = 1;
 
     //Set the response Buffer type
     let valuePtr: any;
@@ -72,7 +80,7 @@ export abstract class XvbaCOM extends Unknow {
       valuePtr = ref.alloc(ref.types.CString);
     }
 
-    return { pPropToCallPtr, paramPtr, responsePtr, valuePtr, inputValueType };
+    return { pPropToCallPtr, responsePtr, valuePtr, inputValueType };
   }
 
   /**
@@ -85,7 +93,6 @@ export abstract class XvbaCOM extends Unknow {
     let inputValueType = PropType.STRING;
 
     if (param !== undefined && param !== "") {
- 
       let bufferType: any;
       switch (typeof param) {
         case "number":
@@ -105,7 +112,6 @@ export abstract class XvbaCOM extends Unknow {
       }
       paramPtr = ref.alloc(bufferType, param);
     } else {
-  
       paramPtr = ref.NULL;
       inputValueType = 100;
     }
@@ -144,8 +150,8 @@ export abstract class XvbaCOM extends Unknow {
    */
   protected CallMethodToGetObject(
     propToCall: string,
-    param: any = "",
-    XCom: any
+    XCom: any,
+    ...param: any
   ) {
     try {
       let response: IResponse | undefined = this._Invoke(propToCall, param);
@@ -168,7 +174,7 @@ export abstract class XvbaCOM extends Unknow {
    * @param param : Array | string | number | Boolean
    * @returns string
    */
-  protected CallMethodToGetString(propToCall: string, param: any = "") {
+  protected CallMethodToGetString(propToCall: string, ...param: any) {
     try {
       const response: IResponse | undefined = this._Invoke(propToCall, param);
       if (response !== undefined) {
@@ -187,7 +193,7 @@ export abstract class XvbaCOM extends Unknow {
    * @param propToCall:<string> Method Name
    * @param param : Array | string | number | Boolean
    */
-  protected CallMethodToGetVoid(propToCall: string, param: any = "") {
+  protected CallMethodToGetVoid(propToCall: string, ...param: any) {
     try {
       const response: IResponse | undefined = this._Invoke(propToCall, param);
       if (response !== undefined) {
@@ -207,7 +213,7 @@ export abstract class XvbaCOM extends Unknow {
    * @param param : Array | string | number | Boolean
    * @returns number
    */
-  protected CallMethodToGetNumber(propToCall: string, param: any = "") {
+  protected CallMethodToGetNumber(propToCall: string, ...param: any) {
     try {
       const response: IResponse | undefined = this._Invoke(propToCall, param);
       if (response !== undefined) {
@@ -250,9 +256,9 @@ export abstract class XvbaCOM extends Unknow {
    * @param XvbaCom <XvbaCom>
    * @returns <XvbaCom>
    */
-  protected CreateObject(XvbaCom: any) {
+  protected CreateObject(XvbaCom: any,...param:any) {
     try {
-      const response: IResponse | undefined = this._Invoke(XvbaCom.name);
+      const response: IResponse | undefined = this._Invoke(XvbaCom.name,param);
       if (response === undefined) {
         throw new Error("Error: GetObject Fail");
       } else {
@@ -271,11 +277,11 @@ export abstract class XvbaCOM extends Unknow {
    * @param prop <string> COM Property name
    * @returns
    */
-  protected GetNumbValue(prop: string): number {
+  protected GetNumbValue(prop: string,...param:any): number {
     try {
       const response: IResponse | undefined = this._Invoke(
         prop,
-        "",
+        param,
         PropType.INTEGER
       );
       if (response === undefined) {
@@ -295,11 +301,11 @@ export abstract class XvbaCOM extends Unknow {
    * @param prop <string> COM Property name
    * @returns
    */
-  protected GetStrValue(prop: string) {
+  protected GetStrValue(prop: string,...param:any) {
     try {
       const response: IResponse | undefined = this._Invoke(
         prop,
-        "",
+        param,
         PropType.STRING
       );
       if (response === undefined) {
@@ -369,6 +375,65 @@ export abstract class XvbaCOM extends Unknow {
     } catch (error) {
       XvbaCOM.CloseAllCOM();
       throw new Error("Fail on SetBooleanValue");
+    }
+  }
+
+  private _GetParamType(param: string | number | boolean) {
+    let type: number | undefined;
+
+    switch (typeof param) {
+      case "number":
+        type = PropType.INTEGER;
+        break;
+      case "string":
+        type = PropType.STRING;
+        break;
+      case "boolean":
+        type = PropType.INTEGER;
+        break;
+      default:
+        type = PropType.NULL;
+        break;
+    }
+
+    return { type };
+  }
+
+  private _MakeStructArrayOfParams(args: any): any {
+    if (args.length !== 0) {
+      let structData = StructType({
+        type: ref.types.int32,
+        intValue: ref.types.int32,
+        stringValue: ref.types.CString,
+        boolValue: ref.types.bool,
+      });
+
+      let StructArray = ArrayType(structData);
+
+      const totalArgs = args.length;
+      let paramArrayStruct = new StructArray(totalArgs);
+
+      args.forEach((param: number | string | boolean, index: number) => {
+        const paramStructType = this._GetParamType(param);
+
+        // define the "timeval" struct type
+        const structDataItem = {
+          type: paramStructType.type,
+          intValue: paramStructType.type === PropType.INTEGER ? param : 0,
+          stringValue: paramStructType.type === PropType.STRING ? param : "",
+          boolValue: paramStructType.type === PropType.BOOLEAN ? param : 0,
+        };
+
+        const structItem = new structData(structDataItem);
+
+        paramArrayStruct[index] = structItem;
+      });
+
+      let paramsArrayStrucPtr = ref.alloc(StructArray, paramArrayStruct);
+
+      return { paramsArrayStrucPtr, totalArgs };
+    } else {
+      return { paramsArrayStrucPtr: ref.NULL, totalArgs: 0 };
     }
   }
 }
