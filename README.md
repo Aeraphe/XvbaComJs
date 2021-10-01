@@ -100,6 +100,7 @@ export class Excel extends XvbaCOM {
      * @returns string
      */
     protected CallMethodToGetString(propToCall: string, ...args: any): string;
+    
     /**
      * Call to a COM Method that return void
      *
@@ -107,6 +108,7 @@ export class Excel extends XvbaCOM {
      * @param args : arguments is an Array-like object <string | number | boolean >
      */
     protected CallMethodToGetVoid(propToCall: string, ...param: any): void;
+
     /**
      * Call to a COM Method that returns a Number Value
      *
@@ -115,6 +117,7 @@ export class Excel extends XvbaCOM {
      * @returns number
      */
     protected CallMethodToGetNumber(propToCall: string, ...args: any): number;
+
     /**
      * Get COM property/Object by name
      *
@@ -122,6 +125,7 @@ export class Excel extends XvbaCOM {
      * @returns
      */
     protected GetPropByRef(prop: string): any;
+
     /**
      * Create COM object
      * @param XvbaCom <XvbaCom>
@@ -129,6 +133,7 @@ export class Excel extends XvbaCOM {
      * @returns <XvbaCom>
      */
     protected CreateObject(XvbaCom: XvbaCom, ...args: any): Object<any>;
+
     /**
      * Get COM number Property value by
      * pass COM property name
@@ -138,6 +143,7 @@ export class Excel extends XvbaCOM {
      * @returns
      */
     protected GetNumbValue(prop: string, ...args: any): number;
+
     /**
      * Get COM string Property value
      *
@@ -146,6 +152,7 @@ export class Excel extends XvbaCOM {
      * @returns
      */
     protected GetStrValue(prop: string, ...args: any): string;
+
     /**
      *
      * Set String Value to COM Property
@@ -155,6 +162,7 @@ export class Excel extends XvbaCOM {
      * @returns void
      */
     protected SetStrValue(propToCall: string, value: string): void;
+
     /**
      *
      * Set Number Value to COM Property
@@ -164,6 +172,7 @@ export class Excel extends XvbaCOM {
      * @returns void
      */
     protected SetNumbValue(propToCall: string, value: number): void;
+
     /**
      *
      * Set Boolean Value to COM Property
@@ -179,6 +188,50 @@ export class Excel extends XvbaCOM {
      * @param value
      * @returns
      */
+
+ /**
+     * List of all COM objects create in C++
+     * @returns
+     */
+    static ListGUID(): IGuid[];
+
+    /**
+     * Release all COM
+     *
+     * C++ has no garbage collection and
+     * has to manually managed memory allocation/deallocation
+     *
+     */
+    static ReleaseAllCOM(): void;
+
+    /**
+     * Release all COM With Delay
+     *
+     * C++ has no garbage collection and
+     * has to manually managed memory allocation/deallocation
+     * Some cases the delay on Release COMs is needed
+     *
+     * @param time: number default = 3000ms
+     */
+    static ReleaseAllCOMWithDelay(time?: number): void;
+
+    /**
+     * Release all COM
+     *
+     * C++ has no garbage collection and
+     * has to manually managed memory allocation/deallocation
+     * @param className
+     */
+    static ReleaseSelectedCom(className?: string): void;
+
+    /**
+     * Release all COM
+     *
+     * C++ has no garbage collection and
+     * has to manually managed memory allocation/deallocation
+     * @param className
+     */
+    ReleaseCOM(): void;
 
 ```
 
