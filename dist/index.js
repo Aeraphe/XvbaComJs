@@ -4896,8 +4896,8 @@ exports.ApiOl32 = ffi.Library(getDllFile(), {
     ],
     XvbaSetVal: ["int", ["pointer", "pointer", "pointer", "int"]],
     XvbaRelease: ["int", ["pointer"]],
-    test: ['int', ["void*"]],
 });
+"";
 
 
 /***/ }),

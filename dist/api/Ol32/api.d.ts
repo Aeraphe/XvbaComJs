@@ -6,5 +6,4 @@ export declare const ApiOl32: {
     XvbaCall: ffi.ForeignFunction<number, [import("ref-napi").Pointer<unknown>, import("ref-napi").Pointer<unknown>, import("ref-napi").Pointer<unknown>, import("ref-napi").Pointer<unknown>, import("ref-napi").Pointer<unknown>, number, number]>;
     XvbaSetVal: ffi.ForeignFunction<number, [import("ref-napi").Pointer<unknown>, import("ref-napi").Pointer<unknown>, import("ref-napi").Pointer<unknown>, number]>;
     XvbaRelease: ffi.ForeignFunction<number, [import("ref-napi").Pointer<unknown>]>;
-    test: ffi.ForeignFunction<number, [import("ref-napi").Pointer<unknown>]>;
 };
