@@ -1,0 +1,45 @@
+{
+  "name": "xvba-com",
+  "version": "1.0.1b",
+  "description": "Create a Windows COM like ExcelXvba (excel-xvba)",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack --mode development --watch "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aeraphe/XvbaCom.git"
+  },
+  "keywords": [
+    "xvba",
+    "vba",
+    "excel",
+    "win32",
+    "ol32",
+    "word",
+    "powerpoint"
+  ],
+  "author": "Alberto Eduardo de Castro Oliveira",
+  "email": "albeto.aeraphe@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Aeraphe/XvbaCom/issues"
+  },
+  "homepage": "www.xvba.dev",
+  "devDependencies": {
+    "@types/ffi-napi": "^4.0.4",
+    "@types/ref-napi": "^3.0.4",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.4.3",
+    "webpack": "^5.53.0",
+    "webpack-cli": "^4.8.0"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "ffi-napi": "^4.0.3",
+    "ref-array-napi": "^1.2.2",
+    "ref-struct-napi": "^1.1.1"
+  }
+}

@@ -2,7 +2,8 @@ import { Unknow } from "./UnKnow";
 export declare enum PropType {
     STRING = 0,
     INTEGER = 1,
-    BOOLEAN = 2
+    BOOLEAN = 2,
+    NULL = 100
 }
 export declare abstract class XvbaCOM extends Unknow {
     constructor(application?: string);
@@ -37,7 +38,7 @@ export declare abstract class XvbaCOM extends Unknow {
      * @param param : Array | string | number | Boolean
      * @returns XvbaCom
      */
-    protected CallMethodToGetObject(propToCall: string, param: any, XCom: any): any;
+    protected CallMethodToGetObject(propToCall: string, XCom: any, ...param: any): any;
     /**
      * Call to a COM Method that returns a String value
      *
@@ -45,14 +46,14 @@ export declare abstract class XvbaCOM extends Unknow {
      * @param param : Array | string | number | Boolean
      * @returns string
      */
-    protected CallMethodToGetString(propToCall: string, param?: any): any;
+    protected CallMethodToGetString(propToCall: string, ...param: any): any;
     /**
      * Call to a COM Method that return void
      *
      * @param propToCall:<string> Method Name
      * @param param : Array | string | number | Boolean
      */
-    protected CallMethodToGetVoid(propToCall: string, param?: any): void;
+    protected CallMethodToGetVoid(propToCall: string, ...param: any): void;
     /**
      * Call to a COM Method that returns a Number Value
      *
@@ -60,7 +61,7 @@ export declare abstract class XvbaCOM extends Unknow {
      * @param param : Array | string | number | Boolean
      * @returns number
      */
-    protected CallMethodToGetNumber(propToCall: string, param?: any): any;
+    protected CallMethodToGetNumber(propToCall: string, ...param: any): any;
     /**
      * Get COM property/Object by name
      *
@@ -73,7 +74,7 @@ export declare abstract class XvbaCOM extends Unknow {
      * @param XvbaCom <XvbaCom>
      * @returns <XvbaCom>
      */
-    protected CreateObject(XvbaCom: any): any;
+    protected CreateObject(XvbaCom: any, ...param: any): any;
     /**
      * Get COM number Property value by
      * pass COM property name
@@ -81,14 +82,14 @@ export declare abstract class XvbaCOM extends Unknow {
      * @param prop <string> COM Property name
      * @returns
      */
-    protected GetNumbValue(prop: string): number;
+    protected GetNumbValue(prop: string, ...param: any): number;
     /**
      * Get COM string Property value
      *
      * @param prop <string> COM Property name
      * @returns
      */
-    protected GetStrValue(prop: string): any;
+    protected GetStrValue(prop: string, ...param: any): any;
     /**
      *
      * Set String Value to COM Property
@@ -116,4 +117,6 @@ export declare abstract class XvbaCOM extends Unknow {
      * @returns void
      */
     protected SetBooleanValue(propToCall: string, value: Boolean): void;
+    private _GetParamType;
+    private _MakeStructArrayOfParams;
 }
