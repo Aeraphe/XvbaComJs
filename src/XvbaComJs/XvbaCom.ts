@@ -24,7 +24,7 @@ export abstract class XvbaCOM extends Unknow {
   /**
    *
    * @param propToCall <string> the name of the method | property | object to call IDispatch::Invoke
-   * @param param <string | number |boolean>
+   * @param param : arguments is an Array-like object
    * @param type
    * @returns
    */
@@ -42,6 +42,7 @@ export abstract class XvbaCOM extends Unknow {
       );
       const { paramsArrayStrucPtr, totalArgs } =
         this._MakeStructArrayOfParams(param);
+
       const HRESULT = ApiOl32.XvbaCall(
         inputPtr.pPropToCallPtr,
         this.guid.pointer,
@@ -145,16 +146,12 @@ export abstract class XvbaCOM extends Unknow {
    * Call to a COM Method that returns a XvbaCom Object
    *
    * @param propToCall:<string> Method Name
-   * @param param : Array | string | number | Boolean
+   * @param args : arguments is an Array-like object <string | number | boolean >
    * @returns XvbaCom
    */
-  protected CallMethodToGetObject(
-    propToCall: string,
-    XCom: any,
-    ...param: any
-  ) {
+  protected CallMethodToGetObject(propToCall: string, XCom: any, ...args: any) {
     try {
-      let response: IResponse | undefined = this._Invoke(propToCall, param);
+      let response: IResponse | undefined = this._Invoke(propToCall, args);
 
       if (response !== undefined) {
         return new XCom(response.objectPtr);
@@ -171,12 +168,12 @@ export abstract class XvbaCOM extends Unknow {
    * Call to a COM Method that returns a String value
    *
    * @param propToCall:<string> Method Name
-   * @param param : Array | string | number | Boolean
+   * @param args : arguments is an Array-like object <string | number | boolean >
    * @returns string
    */
-  protected CallMethodToGetString(propToCall: string, ...param: any) {
+  protected CallMethodToGetString(propToCall: string, ...args: any) {
     try {
-      const response: IResponse | undefined = this._Invoke(propToCall, param);
+      const response: IResponse | undefined = this._Invoke(propToCall, args);
       if (response !== undefined) {
         return response.value.toString();
       } else {
@@ -191,7 +188,7 @@ export abstract class XvbaCOM extends Unknow {
    * Call to a COM Method that return void
    *
    * @param propToCall:<string> Method Name
-   * @param param : Array | string | number | Boolean
+   * @param args : arguments is an Array-like object <string | number | boolean >
    */
   protected CallMethodToGetVoid(propToCall: string, ...param: any) {
     try {
@@ -210,12 +207,12 @@ export abstract class XvbaCOM extends Unknow {
    * Call to a COM Method that returns a Number Value
    *
    * @param propToCall:<string> Method Name
-   * @param param : Array | string | number | Boolean
+   * @param args : arguments is an Array-like object <string | number | boolean >
    * @returns number
    */
-  protected CallMethodToGetNumber(propToCall: string, ...param: any) {
+  protected CallMethodToGetNumber(propToCall: string, ...args: any) {
     try {
-      const response: IResponse | undefined = this._Invoke(propToCall, param);
+      const response: IResponse | undefined = this._Invoke(propToCall, args);
       if (response !== undefined) {
         return response.value.deref();
       } else {
@@ -254,11 +251,12 @@ export abstract class XvbaCOM extends Unknow {
   /**
    * Create COM object
    * @param XvbaCom <XvbaCom>
+   * @param args : arguments is an Array-like object <string | number | boolean >
    * @returns <XvbaCom>
    */
-  protected CreateObject(XvbaCom: any,...param:any) {
+  protected CreateObject(XvbaCom: any, ...args: any) {
     try {
-      const response: IResponse | undefined = this._Invoke(XvbaCom.name,param);
+      const response: IResponse | undefined = this._Invoke(XvbaCom.name, args);
       if (response === undefined) {
         throw new Error("Error: GetObject Fail");
       } else {
@@ -275,13 +273,14 @@ export abstract class XvbaCOM extends Unknow {
    * pass COM property name
    *
    * @param prop <string> COM Property name
+   * @param args : arguments is an Array-like object <string | number | boolean >
    * @returns
    */
-  protected GetNumbValue(prop: string,...param:any): number {
+  protected GetNumbValue(prop: string, ...args: any): number {
     try {
       const response: IResponse | undefined = this._Invoke(
         prop,
-        param,
+        args,
         PropType.INTEGER
       );
       if (response === undefined) {
@@ -299,13 +298,14 @@ export abstract class XvbaCOM extends Unknow {
    * Get COM string Property value
    *
    * @param prop <string> COM Property name
+   * @param args : arguments is an Array-like object <string | number | boolean >
    * @returns
    */
-  protected GetStrValue(prop: string,...param:any) {
+  protected GetStrValue(prop: string, ...args: any) {
     try {
       const response: IResponse | undefined = this._Invoke(
         prop,
-        param,
+        args,
         PropType.STRING
       );
       if (response === undefined) {
@@ -378,10 +378,16 @@ export abstract class XvbaCOM extends Unknow {
     }
   }
 
-  private _GetParamType(param: string | number | boolean) {
+  /**
+   * Check the param type receive from  functions and return a number
+   * correspond to the type in C++
+   * @param value
+   * @returns
+   */
+  private _GetParamType(value: string | number | boolean) {
     let type: number | undefined;
 
-    switch (typeof param) {
+    switch (typeof value) {
       case "number":
         type = PropType.INTEGER;
         break;
@@ -399,6 +405,13 @@ export abstract class XvbaCOM extends Unknow {
     return { type };
   }
 
+  /**
+   *
+   * Receive args from functions and convert on Array of Struct for C++
+   *
+   * @param args Array<any>
+   * @returns
+   */
   private _MakeStructArrayOfParams(args: any): any {
     if (args.length !== 0) {
       let structData = StructType({
