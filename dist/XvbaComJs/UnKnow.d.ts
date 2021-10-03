@@ -4,6 +4,7 @@ interface IGuid {
     name: string;
 }
 export declare abstract class Unknow {
+    private static GUIDList;
     guid: IGuid;
     protected application: string;
     constructor(prop?: any);

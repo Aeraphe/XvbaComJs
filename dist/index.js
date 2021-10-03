@@ -4137,9 +4137,6 @@ const propType = {
     PROPERTY_PUT: 0x4,
     PROPERTY_PUTREF: 0x8,
 };
-let lastComCreate;
-//GUID Global Unique Identifier List for Created COMs
-let GUIDList = [];
 class Unknow {
     constructor(prop) {
         this.guid = { pointer: null, type: null, name: "" };
@@ -4150,13 +4147,12 @@ class Unknow {
             let responsePtr = ref.alloc(ref.types.uint32);
             const HRESULT = api_1.ApiOl32.XvbaCoCreateInstance(ProgID, responsePtr);
             this.guid.pointer = responsePtr;
-            lastComCreate = responsePtr;
             console.log(HRESULT);
         };
         this.CreateInstace(prop);
     }
     CreateInstace(prop) {
-        GUIDList.push(this.guid);
+        Unknow.GUIDList.push(this.guid);
         this.guid.type = propType.METHOD;
         this.guid.name = this.constructor.name;
         if (prop !== undefined && typeof prop === "string") {
@@ -4166,7 +4162,8 @@ class Unknow {
             this.guid.pointer = prop;
             return;
         }
-        if (lastComCreate === undefined) {
+        //Check if the first COM was not created
+        if (Unknow.GUIDList[0].pointer === null) {
             this.CreateTheFirstCom();
         }
         else {
@@ -4177,9 +4174,9 @@ class Unknow {
         const className = this.constructor.name;
         const classNamePtr = Buffer.from(className + "\0", "ucs2");
         let responsePtr = ref.alloc(ref.types.uint32);
-        const HRESULT = api_1.ApiOl32.XvbaGetMethod(lastComCreate, responsePtr, classNamePtr);
+        const lastGuiIndex = Unknow.GUIDList.length - 2;
+        const HRESULT = api_1.ApiOl32.XvbaGetMethod(Unknow.GUIDList[lastGuiIndex].pointer, responsePtr, classNamePtr);
         this.guid.pointer = responsePtr;
-        lastComCreate = responsePtr;
         console.log(HRESULT);
     }
     /**
@@ -4187,7 +4184,7 @@ class Unknow {
      * @returns
      */
     static ListGUID() {
-        return GUIDList;
+        return Unknow.GUIDList;
     }
     /**
      * Release all COM
@@ -4197,11 +4194,11 @@ class Unknow {
      *
      */
     static ReleaseAllCOM() {
-        if (GUIDList.length > 0) {
-            GUIDList.map((gui) => {
+        if (Unknow.GUIDList.length > 0) {
+            Unknow.GUIDList.map((gui) => {
                 console.log(api_1.ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
             });
-            GUIDList = [];
+            Unknow.GUIDList = [];
         }
     }
     /**
@@ -4215,11 +4212,11 @@ class Unknow {
      */
     static ReleaseAllCOMWithDelay(time = 3000) {
         setTimeout(() => {
-            if (GUIDList.length > 0) {
-                GUIDList.map((gui) => {
+            if (Unknow.GUIDList.length > 0) {
+                Unknow.GUIDList.map((gui) => {
                     console.log(api_1.ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
                 });
-                GUIDList = [];
+                Unknow.GUIDList = [];
             }
         }, time);
     }
@@ -4231,15 +4228,15 @@ class Unknow {
      * @param className
      */
     static ReleaseSelectedCom(className) {
-        if (GUIDList.length > 0) {
-            GUIDList.map((gui) => {
+        if (Unknow.GUIDList.length > 0) {
+            Unknow.GUIDList.map((gui) => {
                 if (className != undefined) {
                     if (gui.name === className) {
                         console.log(api_1.ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
                     }
                 }
             });
-            GUIDList = [];
+            Unknow.GUIDList = [];
         }
     }
     /**
@@ -4255,6 +4252,8 @@ class Unknow {
     }
 }
 exports.Unknow = Unknow;
+//GUID Global Unique Identifier List off Created COMs
+Unknow.GUIDList = [];
 
 
 /***/ }),
