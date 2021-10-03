@@ -8,18 +8,17 @@ const propType = {
   PROPERTY_PUTREF: 0x8,
 };
 
-let lastComCreate: any;
-
 interface IGuid {
   pointer: any;
   type: any;
   name: string;
 }
 
-//GUID Global Unique Identifier List for Created COMs
-let GUIDList: Array<IGuid> = [];
-
 export abstract class Unknow {
+
+  //GUID Global Unique Identifier List off Created COMs
+  private static GUIDList: Array<IGuid> = [];
+
   guid: IGuid = { pointer: null, type: null, name: "" };
   //COM object name
   protected application = "";
@@ -29,7 +28,7 @@ export abstract class Unknow {
   }
 
   private CreateInstace(prop?: any) {
-    GUIDList.push(this.guid);
+    Unknow.GUIDList.push(this.guid);
     this.guid.type = propType.METHOD;
     this.guid.name = this.constructor.name;
 
@@ -40,8 +39,8 @@ export abstract class Unknow {
 
       return;
     }
-
-    if (lastComCreate === undefined) {
+    //Check if the first COM was not created
+    if (Unknow.GUIDList[0].pointer === null) {
       this.CreateTheFirstCom();
     } else {
       this.InitializeMethods();
@@ -53,7 +52,6 @@ export abstract class Unknow {
     let responsePtr: any = ref.alloc(ref.types.uint32);
     const HRESULT = ApiOl32.XvbaCoCreateInstance(ProgID, responsePtr);
     this.guid.pointer = responsePtr;
-    lastComCreate = responsePtr;
     console.log(HRESULT);
   };
 
@@ -61,37 +59,37 @@ export abstract class Unknow {
     const className = this.constructor.name;
     const classNamePtr: any = Buffer.from(className + "\0", "ucs2");
     let responsePtr: any = ref.alloc(ref.types.uint32);
+    const lastGuiIndex = Unknow.GUIDList.length - 2;
     const HRESULT = ApiOl32.XvbaGetMethod(
-      lastComCreate,
+      Unknow.GUIDList[lastGuiIndex].pointer,
       responsePtr,
       classNamePtr
     );
     this.guid.pointer = responsePtr;
-    lastComCreate = responsePtr;
     console.log(HRESULT);
   }
 
   /**
    * List of all COM objects create in C++
-   * @returns 
+   * @returns
    */
   static ListGUID() {
-    return GUIDList;
+    return Unknow.GUIDList;
   }
 
   /**
    * Release all COM
-   * 
+   *
    * C++ has no garbage collection and
    * has to manually managed memory allocation/deallocation
-   * 
+   *
    */
   static ReleaseAllCOM() {
-    if (GUIDList.length > 0) {
-      GUIDList.map((gui) => {
+    if (Unknow.GUIDList.length > 0) {
+      Unknow.GUIDList.map((gui) => {
         console.log(ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
       });
-      GUIDList = [];
+      Unknow.GUIDList = [];
     }
   }
 
@@ -106,32 +104,32 @@ export abstract class Unknow {
    */
   static ReleaseAllCOMWithDelay(time = 3000) {
     setTimeout(() => {
-      if (GUIDList.length > 0) {
-        GUIDList.map((gui) => {
+      if (Unknow.GUIDList.length > 0) {
+        Unknow.GUIDList.map((gui) => {
           console.log(ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
         });
-        GUIDList = [];
+        Unknow.GUIDList = [];
       }
     }, time);
   }
 
   /**
    * Release all COM
-   * 
+   *
    * C++ has no garbage collection and
    * has to manually managed memory allocation/deallocation
    * @param className
    */
   static ReleaseSelectedCom(className?: string) {
-    if (GUIDList.length > 0) {
-      GUIDList.map((gui) => {
+    if (Unknow.GUIDList.length > 0) {
+      Unknow.GUIDList.map((gui) => {
         if (className != undefined) {
           if (gui.name === className) {
             console.log(ApiOl32.XvbaRelease(gui.pointer), ":", gui.name);
           }
         }
       });
-      GUIDList = [];
+      Unknow.GUIDList = [];
     }
   }
 
